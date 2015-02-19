@@ -91,11 +91,23 @@ rpm:	dist
 	sudo chroot ${RPMCHROOT} su - package -c "rpm -ba rpm/SPECS/$(PKGNAME).spec"
 
 rpm-repository:
-	install -m 0755 rpm/repos/generate-repository.sh ${RPMCHROOT}/${HOME_}/
+	cp rpm/repos/generate-repository.sh ${RPMCHROOT}/${HOME_}/
 	sudo chroot ${RPMCHROOT} su - package -c "./generate-repository.sh"
+	for d in mandriva mageia fedora centos opensuse; do \
+	  rm -rf /srv/mirror/hosting.dev/$$d; \
+	  rsync -avH --delete \
+	     ${RPMCHROOT}/${HOME_}/repository/$$d \
+	     build2-mass.mgt.gandi.net::repo/hosting.dev/; \
+	done
 
-all: clean rpm
-	@echo -e "Build rpm repository with 'make rpm-repository'."
+rsync:
+	rsync -av ../$(PKGNAME)*$(VCREV)*.deb build2-mass.mgt.gandi.net::repo/hosting.dev/common
+
+all: clean rpm rsync
+	@echo -e "\nMay I suggest you to 'make rpm-repository' and then build the repository in the main system ?\n"
+
+jenkins: all
+	make rpm-repository
 
 complete-clean: clean
 	for ext in deb changes tar.gz; do \
