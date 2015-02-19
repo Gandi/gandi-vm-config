@@ -2,5 +2,4 @@ Practical command to build :
 
 make clean && \
 make build && \
-make rsync && \
 make rpm
