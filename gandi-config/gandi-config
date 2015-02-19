@@ -1,0 +1,73 @@
+#!/bin/sh -e
+#
+# gandi-config     Start/Stop the Gandi config script.
+#
+# chkconfig: 2345 52 25
+# description: initscript which configure virtual machine in Gandi \
+#              Gandi hosting. It use a plugin system.
+# processname: gandi-config
+# config: /etc/sysconfig/gandi
+# pidfile: /var/run/gandi-config.pid
+#
+### BEGIN INIT INFO
+# Provides: gandi-config
+# Required-Start: $syslog $local_fs
+# Required-Stop: 
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# X-Start-Before: ssh
+# Short-Description: gandi-config to setup virtual machine at Gandi.
+# Description: initscript which configure virtual machine in Gandi \
+#              Gandi hosting. It use a plugin system.
+### END INIT INFO
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+# we source the configuration file
+if [ -e /etc/default/gandi ]; then
+    . /etc/default/gandi
+else
+    if [ -e /etc/sysconfig/gandi ]; then
+        . /etc/sysconfig/gandi
+    else
+        echo "No configuration file found. Exiting." | logger -t gandi
+        exit 1
+    fi
+fi
+
+do_start() {
+    if [ -z "$GANDI_PLUGIN_DIR" -o ! -d "$GANDI_PLUGIN_DIR" ]; then
+        echo "Configuration directory is not present : $GANDI_PLUGIN_DIR" | logger -t gandi
+	exit 1
+    fi
+
+    pluginlist=$( ls -1 "$GANDI_PLUGIN_DIR" | egrep -v "(pre-first|\.dpkg.*)")
+    for pluginname in $pluginlist; do
+	if [ -x "${GANDI_PLUGIN_DIR}/${pluginname}" ]; then
+            if ( ${GANDI_PLUGIN_DIR}/${pluginname} ); then
+	        echo "${pluginname} executed correctly." | logger -t gandi
+	    else
+	        echo "Problem with ${pluginname}." | logger -t gandi
+	    fi
+	fi
+    done
+}
+
+case "$1" in
+    start|restart|reload)
+	do_start
+
+        if [ -e "$GANDI_HOOK_DIR"/post-vm-config ]; then
+            "$GANDI_HOOK_DIR"/post-vm-config
+        fi
+    ;;
+    stop|force-reload|status)
+	# nothing
+    ;;
+    *)
+	echo "Script only started at boot for system configuration."
+    ;;
+esac
+
+exit 0

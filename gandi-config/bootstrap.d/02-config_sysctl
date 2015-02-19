@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+# no need to overwrite tge sysctl.conf config file.
+
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
+
+umask 022
+
+if [ $CONFIG_SYSCTL -eq 0 ]; then
+    exit 0
+fi
+
+# we load the sysctl config
+if [ -e /etc/gandi/sysctl.conf ]; then
+    $(which sysctl) -q -p /etc/gandi/sysctl.conf
+fi
+
+exit 0
+
+# EOF

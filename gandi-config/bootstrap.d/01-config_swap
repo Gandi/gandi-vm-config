@@ -1,0 +1,180 @@
+#!/bin/sh
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+swap_device=/dev/xvda2
+# freebsd
+if [ -b /dev/da1 ]; then
+    swap_device=/dev/da1
+elif [ ! -d /proc/xen ]; then
+    swap_device=/dev/sdb
+fi
+
+# We load the default functions and configuration for gandi-config 
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1 
+load_config 
+
+# params: $1 is swap device
+ensure_safe() {
+    ## Try to avoid calling mkswap on non blank disks
+    md5=$(dd if=${1} bs=4k count=128 2>/dev/null | md5sum)
+    if [ "$md5" != "59071590099d21dd439896592338bf95  -" ]; then
+        echo "Disk ${1} does not seem empty, skipping" 1>&2
+        echo "Disk ${1} does not seem empty, skipping" | logger
+        return 1
+    fi
+
+    return 0
+}
+
+# params: $1 is swap device
+create_swap() {
+    mkswap -L swap -v1 -f "$1" > /dev/null || \
+      mkswap -L swap -v1 "$1" > /dev/null
+    enable_swap "$1" "swap"
+}
+
+# params: $1 is swap device, $2 is type
+enable_swap() {
+    if expr match "swap|SWAP|Swap" "$2" > /dev/null; then
+        swapon "$1"
+    fi
+}
+
+# params: $1 is swap device
+detect_blkid() {
+    ## According to blkid manpage: If the specified token was not found,
+    ## or no (specified) devices could be identified, an exit code of 2 is
+    ## returned.
+    type=$(/sbin/blkid -s TYPE "$swap_device")
+    ret=$?
+    if [ $ret -eq 2 ]; then
+        ensure_safe "$1" && create_swap "$1"
+    elif [ $ret -eq 0 ]; then
+        type=$(/sbin/blkid -s TYPE -o value "$1")
+        enable_swap "$1" "$type"
+    fi
+}
+
+# params: $1 is swap device
+detect_vol_id() {
+    type=$(/lib/udev/vol_id --type "$1")
+    ## vol_id returns 4 when volume type is unknown
+    ret=$?
+    if [ $ret -eq 4 ]; then
+        ensure_safe "$1" && create_swap "$1"
+    elif [ $ret -eq 0 ]; then
+        enable_swap "$1" "$type"
+    fi
+}
+
+# params: $1 is swap device
+setup_in_swap() {
+    ## running on Debian wheezy 7.5 with tar 1.26, the return code for the
+    ## command on the device is 2, which means ok but with warning issue.
+    tar -C / -x -i -f "$1"
+    retcode=$?
+    if [ 1 -ne $retcode ]; then
+        gdir='/gandi/'
+        keep_ro=0
+
+        if [ ! -w / ]; then
+            keep_ro=1
+            mount -o remount,rw /
+        fi
+
+        # 2. GNU/Linux kernel modules 
+        if [ -w /lib/modules ]; then
+	    if [ -L /lib ]; then
+		baserep='/usr'
+	    else
+		baserep='/'
+	    fi
+	    
+            kernel_ver=$(uname -r)
+            taropts=''
+            fileext=''
+	    install=0
+
+            if [ -f "${gdir}/${kernel_ver}-modules.tar.gz" ]; then
+                taropts='-z'
+                fileext='gz'
+		install=1
+            fi
+
+            if [ -f "${gdir}/${kernel_ver}-modules.tar.bz2" ]; then
+                taropts='-j'
+                fileext='bz2'
+		install=1
+            fi
+
+	    if [ $install = 1 ]; then
+		cd $baserep
+		tar -x $taropts -f "${gdir}/${kernel_ver}-modules.tar.$fileext"
+		rm -f "${gdir}/${kernel_ver}-modules.tar.$fileext"
+                if [ '/' != "$baserep" ]; then
+                    mv -f $baserep/boot/* /boot/
+                    rmdir $baserep/boot
+                fi
+		depmod "$kernel_ver"
+		
+		modules_uid=$(stat -t "$baserep/lib/modules/$kernel_ver" -c %u)
+		if [ 0 -ne "$modules_uid" ]; then
+                    chown -R root:root $baserep/lib/modules/$kernel_ver
+		fi
+	    fi
+        fi
+
+        # 3. setup script - configuration is available in /gandi/config 
+        # in JSON format
+        if [ -x $gdir/init ]; then
+            pbin=/usr/bin/python2
+            [ -x $pbin ] || pbin=/usr/bin/python
+            $pbin $gdir/init
+        fi
+
+        if [ 1 -eq $keep_ro ]; then
+            mount -o remount,ro /
+            unset keep_ro
+        fi
+
+        # then
+        create_swap "$1"
+    fi
+}
+
+# check if $swap_device exist and not if already enable as swap
+if [ -e "$swap_device" ]; then
+    if ! /sbin/swapon -s | grep -q "^$swap_device "; then
+
+        # if the type of the device is swap, it should not
+        # contain a tar archive. This allow quicker VM boot
+        # during a vm.reboot operation
+        device_type=`blkid -o value -s TYPE $swap_device`
+        if [ 'swap' != "$device_type" ]; then
+
+            ## running on Debian wheezy 7.5 with tar 1.26, the return code for the
+            ## command on the device is 2, which means ok but with warning issue.
+            tar -itf "$swap_device" gandi > /dev/null
+            retcode=$?
+            if [ 1 -ne $retcode ]; then
+                # the swap contains the setup file, we should act.
+                setup_in_swap "$swap_device"
+            else
+                if [ -x /sbin/blkid ]; then
+                    detect_blkid "$swap_device"
+                else
+                    if [ -x /lib/udev/vol_id ]; then
+                        detect_vol_id "$swap_device"
+                    else
+                        echo "No method is available for device detection." | \
+                            logger -t gandi
+                    fi
+                fi
+            fi
+        fi
+    fi
+fi
+
+exit 0

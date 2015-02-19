@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# script called when an ethernet virtual interface is attached
+# (action 'add') or detached (action 'remove') from a virtual 
+# machine.
+
+umask 022 
+
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
+
+export PATH=$PATH:/sbin
+IP=/bin/ip
+[ ! -x $IP ] && IP=$(which ip)
+
+remove_defaults_route() {
+    # first param is the current iface we try to configure
+    # We check for 11 network interfaces but the VM should only have
+    # four iface maximum.
+    gw_dev="eth0"
+    for i in `seq 0 10`; do
+        if $IP -4 addr show dev eth${i} | grep "inet .*brd" | \
+          grep -E -q -v 'inet (10\.|127\.0|224\.0|192\.168\.|172\.1[6-9]\.|172\.2[0-9]\.|172.3[0-1]\.)'; then
+            gw_dev="eth${i}"
+            break
+        fi
+    done
+
+    $IP -4 route list exact default | grep -v "dev $gw_dev" | while read elt; do
+        $IP -4 route del $elt
+    done
+}
+
+stop_dhcp_client() {
+    for file_ in dhclient.$1.pid dhclient-$1.pid dhclient.pid; do
+        if [ -f /var/run/$file_ ]; then
+            dhpid=$(cat /var/run/$file_)
+            if [ "o$dhpid" != "o" ]; then
+                if (ps -eo pid,cmd | grep "$dhpid" | grep -v grep | grep -q "$1"); then
+                    kill "$dhpid" && rm -f "/var/run/$file_"
+                fi
+            fi
+        fi
+    done
+
+    # for all the other cases of running dhclient on the interface
+    pkill -9 -f "dhclient.*$1"
+}
+
+iface_link_up() {
+    # fix for 3.2-xenU kernel
+
+    # try to flag the network interface up
+    # if unsuccessful, we wait 3 seconds
+    $IP link set $1 up > /dev/null 2>&1
+    if [ $? -gt 0 ]; then
+        sleep 2
+        $IP link set $1 up > /dev/null 2>&1
+    fi
+}
+
+iface_up() {
+    iface_link_up $1
+
+    # then we can call dhclient
+    rm -f /var/lib/dhclient.eth0.leases
+    rm -f /var/lib/dhclient.leases
+    dhbin="/sbin/dhclient"
+    [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
+    $dhbin -1 -q $1
+
+    stop_dhcp_client $1
+
+    if [ -e /sys/module/virtio_net ] && [ $CONFIG_MULTIQUEUE -eq 1 ]; then
+        virtio_config $1
+    fi
+
+    remove_defaults_route
+}
+
+virtio_config() {
+    # $1 is virtual interface to setup
+    nb_proc=`grep -c processor /proc/cpuinfo`
+    [ $nb_proc -gt 8 ] && nb_proc=8
+    [ $nb_proc -gt 1 ] && ethtool -L $1 combined $nb_proc
+}
+
+sysctl_call() {
+    # $1 is patch of sysctl key and $2 is the value
+    sysctl -q -w "$1=$2" 
+    if [ $? -ne 0 ]; then
+        echo "Error when setting $1 with $2" | logger -t gandi
+    fi
+}
+
+sysctl_config() {
+    # $1 is the network interface name
+    if [ "$1" != 'eth0' ]; then
+        # set the ARP behavior when additionnal iface are set
+        sysctl_call "net.ipv4.conf.$1.arp_announce" 2
+        sysctl_call "net.ipv4.conf.$1.rp_filter" 0
+        sysctl_call "net.ipv4.conf.$1.arp_filter" 0
+    fi
+}
+
+if [ -z "$INTERFACE" ]; then
+        echo Interface is not defined.
+        exit 1
+fi
+
+case "$ACTION" in
+    "add")
+        iface_link_up $INTERFACE
+        NODHCP=$CONFIG_NODHCP
+        if [ "$CONFIG_NODHCP" = "${NODHCP/$INTERFACE/}" ]; then 
+            echo "Setup of $INTERFACE" | logger -t gandi
+            iface_up $INTERFACE 
+            sysctl_config $INTERFACE
+
+            if [ -e "$GANDI_HOOK_DIR"/post-iface-attach ]; then
+                "$GANDI_HOOK_DIR"/post-iface-attach
+            fi
+        fi
+    ;;
+    "remove")
+        echo "Removing of $INTERFACE" | logger -t gandi
+        # nothing to do
+    ;;
+esac
+
+exit 0
+# vim:ft=python:et:sw=4:ts=4:sta:tw=79:fileformat=unix

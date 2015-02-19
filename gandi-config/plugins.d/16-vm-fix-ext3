@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+# This script will be started at each boot of the VM. By default filesystem are
+# created with infinite time before FS check. We reset check value to correct
+# value in this case at boot time. lost+found is created if not present.
+
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
+
+TUNE2FS=$(which tune2fs)
+BLKID=$(which blkid)
+
+if [ ! -d /proc/xen ]; then
+    DEVICE=${DEVICE:-/dev/sda}
+else
+    DEVICE=${DEVICE:-/dev/xvda1}
+fi
+
+if [ -e "$DEVICE" ]; then
+    if [ -x "$BLKID" ]; then
+        TYPE=$("$BLKID" -s TYPE "$DEVICE" | grep -o 'TYPE=.*"' | sed -e 's,TYPE=,,' -e 's,",,g')
+    fi
+
+    if [ "$TYPE" = "ext3" -o "$TYPE" = "ext4" ]; then
+        PRESENT_VALUE=$($TUNE2FS -l $DEVICE | grep "^Maximum mount count" | awk -F':' '{ print $2}' | sed -e 's/ //g')
+
+        if [ $PRESENT_VALUE -le 0 ]; then
+                # 42 max count and 2 month for new check
+                $TUNE2FS -c 42 -i 2m "$DEVICE" > /dev/null
+                echo "Setting the max count and time for $DEVICE" | logger -t "$SYSLOG_TARGET"
+        fi
+    fi
+fi
+
+[ -d /lost+found ] || mkdir -m0700 /lost+found
+
+exit 0
+
+# EOF

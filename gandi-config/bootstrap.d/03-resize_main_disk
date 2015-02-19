@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+device=/dev/xvda1
+if [ ! -d /proc/xen ]; then
+    device=/dev/sda
+fi
+
+if [ -e $device ]; then
+    type=$(blkid -s TYPE -o value "$device")
+
+    if [ $(expr match "$type" 'ext') -ge 3 ]; then
+        resize2fs=$(which resize2fs)
+        if [ -x $resize2fs ]; then
+            if ! $resize2fs $device > /dev/null; then
+                loginfo "Error in resizing disk $device, return: $?"
+                return $?
+            fi
+        fi
+    fi
+
+    if [ $(expr match "$type" 'xfs') -ge 3 ]; then
+        xfscmd=$(which xfs_growfs)
+        if [ -x "$xfscmd" ]; then
+            if ! $xfscmd $device > /dev/null; then
+                loginfo "Error in resizing disk $device, return: $?"
+                return $?
+            fi
+        fi
+    fi
+fi
+
+exit 0

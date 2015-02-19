@@ -1,0 +1,101 @@
+#!/bin/sh
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+umask 022
+
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
+
+fsdevice_create() {
+    if [ ! -d /proc/xen ]; then
+        return
+    fi
+
+    # We create xvda if not already present. mostly none udev operating system.
+    for idx in $(seq 1 2); do
+        device_name=/dev/xvda
+        [ $idx -ne 0 ] && device_name="$device_name$idx"
+        [ -e "$device_name" ] || mknod "$device_name" b 202 $idx
+    done
+}
+
+config_file=/etc/hosts
+
+if [ ! -e "$config_file" ]; then
+    cat > "$config_file" << EOT
+# The following lines are desirable for IPv4 capable hosts
+127.0.0.1       localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+EOT
+fi
+
+# /etc/fstab
+config_file=/etc/fstab
+device_name=xvda1
+
+if [ ! -d /proc/xen ]; then
+    device_name=sda
+fi
+
+if [ ! -e "$config_file" ] || ( ! grep ^/dev/"$device_name" "$config_file" > /dev/null ); then
+    [ -e "$config_file" ] && mv "$config_file" "${config_file}".ga-old
+    cat > "$config_file" << EOT
+/dev/$device_name    /                 ext4    rw,noatime,errors=remount-ro  0    1
+devpts        /dev/pts          devpts  defaults      0 0
+none          /proc             proc    rw,nosuid,noexec  0    0
+EOT
+fi
+
+fsdevice_create
+
+# hardware capability
+hwcap=1
+
+# current kernel available are : 2.6.18 (hwcap 0) as default and 2.6.27 (hwcap 1)
+if [ 1 = $(expr match $(uname -r | cut -f1 -d'-') '^2') ]; then
+    kernel_minor=$(uname -r | cut -f1 -d'-' | sed -e 's/^2\.6\.//') 
+    
+    if [ "$kernel_minor" -le 18 ]; then
+        hwcap=0
+    fi
+fi
+
+# 64 bits system does not need the nosegneg hardware capability
+if [ 'i386' = $(uname -i) ] && \
+   [ `expr match "$(file -b /bin/true)" '^ELF 32-bit'` -ge 10]; then
+    
+    if [ -d /etc/ld.so.conf.d ]; then
+        changed=0
+        lddir="/etc/ld.so.conf.d"
+
+        if [ -f "$lddir"/libc6-xen.conf ]; then
+            grep -q -o "^hwcap $hwcap nosegneg" "$lddir"/libc6-xen.conf
+            if [ $? -eq 1 ]; then
+                tempfile_=$(mktemp --suffix='gnd')
+                sed -e "s/^hwcap . nosegneg/hwcap $hwcap nosegneg/g" \
+                    "$lddir"/libc6-xen.conf > "$tempfile_"
+                mv -f "$tempfile_" "$lddir"/libc6-xen.conf
+                changed=1 
+            fi
+        else
+            echo "hwcap $hwcap nosegneg" > "$lddir/xen.conf"
+            changed=1
+        fi
+
+        if [ $changed -eq 1 ]; then
+            echo "Set the nosegneg hwcap" | logger -t "$SYSLOG_TARGET"
+            ldconfig
+        fi
+    fi
+fi
+
+exit 0

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# allow udev rules to find the correct PATH for blkid binary
+
+for BLPATH in /lib/udev /sbin; do
+    if [ -f "$BLPATH/blkid" ]; then
+        if [ -x "$BLPATH/blkid" ]; then 
+            "$BLPATH/blkid" $@ && \
+            exit 0
+	fi
+    fi
+done
+
+for VOLPATH in /lib/udev /sbin; do
+    if [ -f "$VOLPATH/vol_id" ]; then
+        if [ -x "$VOLPATH/vol_id" ]; then
+            # see http://www.faqs.org/faqs/unix-faq/faq/part2/section-12.html
+            eval last=\${$#}
+            "$VOLPATH/vold_id" --export "$last" && \
+            exit 0
+        fi
+    fi
+done
+
+exit 0 

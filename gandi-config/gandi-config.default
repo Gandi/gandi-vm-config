@@ -1,0 +1,59 @@
+# set to 0 to disable changing your motd at boot
+CONFIG_MOTD=1
+
+# set to 0 to disable changing your timezone to Europe/Paris at boot
+CONFIG_TIMEZONE=1
+
+# set to 0 to avoid loading Gandi sysctl options
+CONFIG_SYSCTL=1
+
+# set to 0 to disable change in /etc/ssh/sshd_config about Compression,
+# PermitRootLogin and EmptyPasswords
+CONFIG_SSHD=1
+
+# set to 0 to disable configuring console (tty1, hvc0) on boot
+CONFIG_CONSOLE=1
+
+# set to 0 to avoid hostname automatic reconfigure
+CONFIG_HOSTNAME=1
+
+# set to 0 to avoid nameserver automatic reconfigure
+CONFIG_NAMESERVER=1
+
+# allow mounting the data disk to the mount point using the disk label
+CONFIG_ALLOW_MOUNT=1
+
+# randomize hours and minutes in system cron configuration
+CONFIG_CRON=1
+
+# use these parameters when mounting additional disk
+CONFIG_MOUNT_PARAMS="rw,nosuid,nodev,noatime"
+
+# mount the additional disk in this directory
+# example : /dev/xvdb in /srv/mydatadisk
+CONFIG_DISK_ROOT="/srv"
+
+# set a list of network interfaces which should not be configured by DHCP
+# if you attach a interface setup in your private VLAN, you should consider
+# adding the interface here. If you have multiple interfaces, use space as 
+# separator.
+# ex : CONFIG_NODHCP="eth1 eth2"
+CONFIG_NODHCP="eth0"
+
+# In HVM using virtio, each network virtual interface has as many queues as
+# virtual cpu available. This option allow to configure theses queues.
+CONFIG_MULTIQUEUE=1
+
+# When the virtual machine is stopped and started, a configuration process
+# is started. Switch this value to 0 disable all network configuration: 
+# no static configuration for IPv6 and IPv4, no resolver and so on.
+CONFIG_NETWORK=1
+
+# --- please do not change variable below ---
+
+# specific configuration entry
+GANDI_PLUGIN_DIR=/etc/gandi/plugins.d
+TEMP_DIR_CONF=/var/gandi
+SYSLOG_TARGET=gandi
+SERVERURL=mirrors.gandi.net
+GANDI_HOOK_DIR=/etc/gandi/hooks/

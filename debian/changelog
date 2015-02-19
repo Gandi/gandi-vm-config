@@ -1,0 +1,146 @@
+gandi-hosting-vm2 (2.5-1) unstable; urgency=medium
+
+  * New version
+
+ -- Emerick Mounoury <emerick@gandi.net>  Tue, 10 Feb 2015 14:56:40 +0100
+
+gandi-hosting-vm2 (2.4) unstable; urgency=medium
+
+  * New version
+
+ -- Emerick Mounoury <emerick@gandi.net>  Tue, 10 Feb 2015 13:55:22 +0100
+
+gandi-hosting-vm2 (2.3) unstable; urgency=medium
+
+  * New version
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 05 Jan 2015 16:59:42 +0100
+
+gandi-hosting-vm2 (2.2) unstable; urgency=medium
+
+  * New version
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 17 Dec 2014 16:34:03 +0100
+
+gandi-hosting-vm2 (2.1-7) unstable; urgency=medium
+
+  * fixing device name when resizing main disk on hvm
+
+ -- William Dauchy <william@gandi.net>  Mon, 17 Nov 2014 18:58:42 +0100
+
+gandi-hosting-vm2 (2.1-6) unstable; urgency=medium
+
+  * New release with bugfixes.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 17 Nov 2014 18:58:42 +0100
+
+gandi-hosting-vm2 (2.1-5) unstable; urgency=medium
+
+  * Fix systemd/RPM-based distributions for unit files installation.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Thu, 30 Oct 2014 16:28:18 +0100
+
+gandi-hosting-vm2 (2.1-4) unstable; urgency=medium
+
+  * Switch to disable network configuration at boot.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 30 Sep 2014 17:58:17 +0200
+
+gandi-hosting-vm2 (2.1-3) unstable; urgency=medium
+
+  * Handle virtio multiqueue configuration
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Thu, 11 Sep 2014 17:36:28 +0200
+
+gandi-hosting-vm2 (2.1-2) unstable; urgency=medium
+
+  * Normalize regexp.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Mon, 25 Aug 2014 18:38:09 +0200
+
+gandi-hosting-vm2 (2.1-1) unstable; urgency=medium
+
+  * Add depencies on acpi packages.
+  * Bump release as we handle HVM now.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 19 Aug 2014 15:18:45 +0200
+
+gandi-hosting-vm2 (2.0-12) unstable; urgency=low
+
+  * More udev rules to handle HVM resources.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 27 May 2014 13:31:17 +0200
+
+gandi-hosting-vm2 (2.0-11) unstable; urgency=low
+
+  * Handle HVM resources.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 27 May 2014 13:11:48 +0200
+
+gandi-hosting-vm2 (2.0-10) unstable; urgency=low
+
+  * Fix vif attach udev rule.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Fri, 23 May 2014 18:58:23 +0200
+
+gandi-hosting-vm2 (2.0-9) unstable; urgency=low
+
+  * Handle tar warnings.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 20 May 2014 19:11:54 +0200
+
+gandi-hosting-vm2 (2.0-8) unstable; urgency=low
+
+  * Fix packaging and FS detection
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 28 Apr 2014 15:54:17 +0200
+
+gandi-hosting-vm2 (2.0-7) unstable; urgency=low
+
+  * Fix data disk mount and re-add support for ext3.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Mon, 28 Apr 2014 15:34:33 +0200
+
+gandi-hosting-vm2 (2.0-6) unstable; urgency=low
+
+  * Fix disk mounting script.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Mon, 28 Apr 2014 01:48:33 +0200
+
+gandi-hosting-vm2 (2.0-5) stable; urgency=low
+
+  * New release
+    - fix xen check.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Thu, 03 Apr 2014 11:05:00 +0200
+
+gandi-hosting-vm2 (2.0-4) stable; urgency=low
+
+  * New release:
+   - fix system disk handling.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 26 Mar 2014 15:15:24 +0100
+
+gandi-hosting-vm2 (2.0-3) stable; urgency=low
+
+  * New release:
+    - fix Gandi wiki URL in motd
+    - fix detection of console during boot
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 26 Mar 2014 14:45:01 +0100
+
+gandi-hosting-vm2 (2.0-2) stable; urgency=low
+
+  * New release:
+    - install kernel modules in case of /run
+    - swap: try to support hvm virtual machines
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 12 Mar 2014 16:09:26 +0100
+
+gandi-hosting-vm2 (2.0-1) stable; urgency=low
+
+  * New release:
+    - Avoid fsck at boot and check resize2/4fs command for gandi-hosting-vm2
+      package
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 10 Feb 2014 11:10:20 +0100

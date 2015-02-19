@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
+
+# In case of deb based distribution, we create ssh key
+if is_deb; then
+        # We create ssh host key if not present.
+        if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
+                /usr/sbin/dpkg-reconfigure openssh-server
+        fi
+fi
+
+if [ $CONFIG_SSHD -eq 1 ]; then
+    LC_ALL=C LANG=C perl -pi -e 's/^#?(PermitRootLogin ).*$/\1 without-password/ ; s/^#?(PermitEmptyPasswords ).*$/\1 no/ ; s/^#?(Compression ).*$/\1 delayed/' \
+    /etc/ssh/sshd_config
+    if ! grep '^ListenAddress[ ]*::' /etc/ssh/sshd_config; then
+	echo -e "ListenAddress ::\nListenAddress 0.0.0.0" >> /etc/ssh/sshd_config
+    fi
+fi
+
+exit 0
+
+#EOF

@@ -1,0 +1,37 @@
+Source: gandi-hosting-vm2
+Section: admin
+Priority: optional
+Maintainer: Nicolas Chipaux <aegiap@gandi.net>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: gandi-hosting-vm2
+Architecture: all
+Depends: openssl,
+ udev,
+ initscripts,
+ bind9-host,
+ sed (>= 4),
+ module-init-tools | kmod,
+ python,
+ acpid,
+ acpi-support-base | acpi-support
+Conflicts: gandi-hosting-agent, 
+ gandi-hosting-agent-schemes,
+ gandi-hosting-agent-plugins-internal-debian, 
+ gandi-hosting-agent-plugins-internal-unix,
+ gandi-hosting-vm
+Replaces: gandi-hosting-vm
+Provides: gandi-hosting-vm
+Description: scripts for virtual machine on Gandi IaaS
+ Collection of script to handle dynamic resources of virtual
+ machine on Gandi IaaS hosting solution. most configuration
+ is done during the first and subsequent boot.
+ .
+ services:
+  - gandi-postboot: execute customer scrip to setup the virtual
+  machine.
+  - gandi-config: configure the system during boot
+  - gandi-mount  : if virtual disk is not detected and already
+  mounted, this service start a udev call to re-attach all 
+  available unmounted virtual disks.

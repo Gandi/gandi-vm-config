@@ -1,0 +1,55 @@
+2 new initscripts : gandi-bootstrap early in boot and gandi-postboot at the end
+of the boot process.
+
+0. rpm version
+--------------
+
+The format X.Y-Z in the debian/changelog is mandatory as we split into major,
+minor for the RPM SPEC file. 
+
+
+1. bootstrap
+------------
+
+ - resize main disk (pre-first)
+ - configure using in-swap setup (00-config_swap) -> 
+     adduser
+     password/ssh_key
+     resolv.conf
+     network (loopback, hostname) +> extend python code to match existing scripts
+     /etc/hosts ?
+
+ - setup sysctl (10-config_sysctl)
+ - swap activation / swap creation (00-config_swap)
+
+
+2. config
+---------
+
+ - configure console (01-config_console)
+ - configure /etc/hosts (02-config_system_file)
+ - configure hwcap and install libc6-xen (02-config_system_file)
+ - randomize hour and minute for main crontab and php5 (03-vm-fix-cron)
+ - configure timezone (07-config_timezone) -> setup in Etc/UTC for all and
+   customer could change it using their script ? #as today for now
+ - generate ssh keys for the system (11-config_ssh)
+ - configure sshd file (11-config_ssh)
+ - configure motd (13-config_motd)
+ - setup ext{3,4} check and mount counter (16-vm-fix-ext3) 
+
+3. postboot
+-----------
+
+ - exec of /gandi/init with --postboot param
+ - remove of /gandi
+
+
+remove elements
+---------------
+
+ - configure lo network (04-config_local_network) -> remove
+ - configure hostname (05-config_hostname) -> remove
+ - configure resolver (06-config_nameserver) -> remove
+ - create the 'admin' group (08-config_user_group) -> remove 
+ - fix umask (12-vm-fix-umask) -> remove
+ - fix xinetd and inetd for agent (15-misc) -> remove

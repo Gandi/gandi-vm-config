@@ -1,0 +1,62 @@
+#!/bin/sh -e
+#
+# gandi-bootstrap     Start/Stop the bootstrap Gandi setup script.
+#
+# chkconfig: - 9 89
+# description: initscript which configure early element of the virtual \
+#            machine in Gandi IaaS hosting
+# processname: gandi-bootstrap
+# config: /etc/sysconfig/gandi
+# pidfile: /var/run/gandi-bootstrap.pid
+#
+### BEGIN INIT INFO
+# Provides:           gandi-bootstrap
+# Required-Start:     $local_fs udev
+# Required-Stop:      $remote_fs
+# Default-Start:      S
+# Default-Stop:       0 1 6
+# X-Start-Before:       
+# X-Start-After:      $local_fs udev
+# Short-Description:  gandi-bootstrap to setup virtual machine at Gandi.
+# Description:        initscript which configure virtual machine in Gandi \
+#                     Gandi hosting. It use a plugin system.
+### END INIT INFO
+
+# For CentOS distribution, we have to use 9 as start indice.
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+do_start() {
+    PLUGIN_DIR=/usr/share/gandi/bootstrap.d
+    if [ -z "$PLUGIN_DIR" -o ! -d "$PLUGIN_DIR" ]; then
+        echo "Configuration directory is not present : $PLUGIN_DIR" | logger -t gandi
+	exit 1
+    fi
+
+    pluginlist=$( ls -1 "$PLUGIN_DIR" | egrep -v "(pre-first|\.dpkg.*)")
+    for pluginname in $pluginlist; do
+	if [ -x "${PLUGIN_DIR}/${pluginname}" ]; then
+            if ( ${PLUGIN_DIR}/${pluginname} ); then
+	        echo "${pluginname} executed correctly." | logger -t gandi
+	    else
+	        echo "Problem with ${pluginname}." | logger -t gandi
+	    fi
+	fi
+    done
+}
+
+case "$1" in
+    start|restart|reload)
+        [ -d /run ] && mkdir -p /run/network
+	do_start
+    ;;
+    stop|force-reload|status)
+	# nothing
+    ;;
+    *)
+	echo "Script only started at boot for system configuration."
+    ;;
+esac
+
+exit 0

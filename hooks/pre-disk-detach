@@ -1,0 +1,7 @@
+#
+# pre-disk-detach
+#
+
+# param available for this script :
+# $1 : device name
+# $2 : mountpoint for the device

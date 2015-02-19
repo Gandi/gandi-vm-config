@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# manage memory with newer Linux kernel (>= 3.2)
+
+if [ ! -n "$DEVPATH" ]; then
+    echo "error: DEVPATH is missing" | logger -t gandi
+    exit 1
+fi
+
+status='offline'
+if [ "$ACTION" = 'add' ]; then
+    status='online'
+fi
+
+if [ -f /sys$DEVPATH/state ]; then
+    echo $status > "/sys/$DEVPATH/state"; 
+fi
+
+exit 0

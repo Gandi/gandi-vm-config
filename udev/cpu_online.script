@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# enable cpu with newer Linux kernel (>= 2.6.32)
+
+if [ ! -n "$DEVPATH" ]; then
+    echo "error: DEVPATH is missing" | logger -t gandi
+    exit 1
+fi
+
+if [ -e "/sys/$DEVPATH/online" ]; then
+    echo 1 > /sys/$DEVPATH/online
+fi
+
+exit 0

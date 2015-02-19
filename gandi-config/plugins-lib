@@ -1,0 +1,109 @@
+#!/bin/sh
+
+# is the system based on deb (debian, ubuntu, ...)
+is_deb() {
+	exitcode=1
+	if [ -d /var/lib/dpkg/info -a -f /etc/debian_version -a -f /var/lib/dpkg/status ]; then
+		exitcode=0
+	fi
+
+	return $exitcode
+}
+
+# is the system based on rpm (mandriva, fedora, opensuse, ...)
+is_rpm() {
+	exitcode=1
+    if [ -d /var/lib/rpm ]; then
+		if [ -f /etc/redhat-release -o -f /etc/SuSE-release -o -f /etc/mandriva-release ]; then
+    		exitcode=0
+		fi
+    fi
+
+	return $exitcode
+}
+
+# is the system based on pacman / .xz (archlinux)
+is_xz() {
+        exitcode=1
+    if [ -d /var/lib/pacman ]; then
+                if [ -f /etc/arch-release ]; then
+                exitcode=0
+                fi
+    fi
+
+        return $exitcode
+}
+
+# option activation : either the option is already active, or it's commented
+# and we want to activate it.
+activate_option() {
+	exitcode=1
+
+	configline=$1
+	file=$2
+
+	if [ ! -e "$file" ]; then
+		return $exitcode
+	fi
+
+	if grep "^$configline" "$file" > /dev/null; then
+		exitcode=0
+	else
+		if grep "^#$configline" "$file" > /dev/null; then
+			[ -f "$file".patched ] && rm "$file".patched
+			cat "$file" | sed -e "s/^#\($configline\)/\1/" > "$file".patched
+			[ $? = 0 ] && mv "$file".patched "$file"
+			
+			# XXX TODO => else :  add the option in the file at a specific line
+		fi
+	fi
+
+	return $exitcode
+}
+
+store_conf() {
+    # $1 is the file and $2 is the value
+    load_config
+
+    if [ "$1" = 'hostname' ]; then
+        if [ $( expr match "$2" "^.*[\ /].*$") -eq 0 ]; then 
+            echo "$2" > "$TEMP_DIR_CONF/$1"
+        fi
+    fi
+
+    if [ "$1" = 'localip' -o "$1" = 'gateway' ]; then
+        if [ $(expr match "$2" "^[0-9:]") -gt 0 ]; then
+            echo "$2" > "$TEMP_DIR_CONF/$1"
+        fi
+    fi
+
+    if [ "$1" = 'nameserver' -o "$1" = 'domainsearch' ]; then
+        echo "$2" > "$TEMP_DIR_CONF/$1"
+    fi
+}
+
+mount_tmpfs() {
+    # we setup the tmpfs directory to store information during boot
+    if ( ! grep -q "$TEMP_DIR_CONF" /proc/mounts ); then
+        [ -d "$TEMP_DIR_CONF" ] || mkdir -p "$TEMP_DIR_CONF"
+        mount -t tmpfs -o rw,mode=0755,size=22000 tmpfs "$TEMP_DIR_CONF"
+    fi
+}
+
+# depending on the distribution, default config file is either in /etc/default
+# or /etc/sysconfig
+load_config() {
+    if [ "o" = "o$GANDI_PLUGIN_DIR" ]; then
+        if [ -e /etc/default/gandi ]; then
+            . /etc/default/gandi
+        else
+            if [ -e /etc/sysconfig/gandi ]; then
+                . /etc/sysconfig/gandi
+            fi
+        fi
+    fi
+
+    mount_tmpfs
+}
+
+# vim:et:sw=4:ts=4:sta:tw=79:fileformat=unix

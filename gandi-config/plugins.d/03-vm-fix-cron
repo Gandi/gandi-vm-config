@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
+# all rights reserved.
+
+umask 022
+
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
+
+if [ $CONFIG_CRON -eq 0 ]; then
+    exit 0
+fi
+
+# fix for awstats if not already workaround by cssh or package update
+file="/etc/gandi/agent/config_template/awstats-cron"
+if [ -f $file ]; then
+    if (grep "^0,10,20,30,40,50" $file); then
+        TMPFILE=$(mktemp)
+    	_min=$( date "+%S" )
+        min=$(( $( echo $_min | sed -e 's/^0//' ) % 3 + 1 ))
+
+        cat $file | sed -e "s/0,10,20,30,40,50 \* /$_min *\/$min /" > $TMPFILE
+        mv -f $TMPFILE $file || rm -f $TMPFILE
+
+        [ -f /etc/cron.d/awstats ] && cp -f $file /etc/cron.d/awstats
+    fi
+fi
+
+# fix pour php5
+file="/etc/cron.d/php5"
+if [ -f $file ]; then
+        TMPFILE=$(mktemp)
+        _min=$( date "+%S" )
+	min=$(( $( echo $_min | sed -e 's/^0//' ) % 3 + 1 ))
+
+        echo $_min" */"$min" * * * "$(egrep -v '(^# |^$)' $file | \
+                awk -F' ' '{ ORS=" "; for(i=6;i<=NF;i++) print $i }') \
+                >> $TMPFILE
+        mv -f $TMPFILE $file || rm -f $TMPFILE
+fi
+
+# fix pour crontab
+file="/etc/crontab"
+if [ -f $file ]; then
+        TMPFILE=$(mktemp)
+
+	# seems 08 and 09 are octal value ...
+	_min=$( date "+%S" )
+	min=$(( $( echo $_min | sed -e 's/^0//' ) + 1 ))
+	hour=$(( $min % 6 ))
+	
+	 cat $file | sed \
+	  -e "s/^[0-9][0-9]\? \*\(.*hourly\)$/$(( ($min + 33) % 60 )) *\1/" \
+	  -e "s/^[0-9][0-9]\? [0-9]\?\(.*daily )\)$/$(( $min % 60 )) $hour\1/" \
+	  -e "s/^[0-9][0-9]\? [0-9]\?\(.*weekly )\)$/$(( ($min + 22) % 60 )) $hour\1/" \
+	  -e "s/^[0-9][0-9]\? [0-9]\?\(.*monthly )\)$/$(( ($min + 11) % 60 )) $hour\1/" \
+        > $TMPFILE
+
+        mv -f $TMPFILE $file || rm -f $TMPFILE
+fi
+
+exit 0
