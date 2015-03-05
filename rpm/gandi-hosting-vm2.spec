@@ -17,7 +17,7 @@ License:	Gandi License
 BuildArch: 	noarch
 Group:          System/Configuration 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
-Requires:	openssl, udev
+Requires:	openssl, udev, acpid
 Provides:       gandi-hosting-vm, gandi-hosting-agent
 Obsoletes:      gandi-hosting-vm <= 1.1 , gandi-hosting-agent <= 1.1
 
