@@ -7,9 +7,7 @@
 
 [Unit]
 Description=Gandi-mount mounts the virtual disks with udev at boot
-DefaultDependencies=true
-ConditionPathIsReadWrite=/
-After=local-fs.target remote-fs.target
+DefaultDependencies=no
 
 [Service]
 Type=simple

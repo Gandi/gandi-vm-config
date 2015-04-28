@@ -7,9 +7,7 @@
 
 [Unit]
 Description=Gandi-config configures network, hostname and else on your VM at boot
-DefaultDependencies=true
-ConditionPathIsReadWrite=/
-After=local-fs.target remote-fs.target
+DefaultDependencies=no
 
 [Service]
 Type=simple
