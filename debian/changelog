@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.5-3) unstable; urgency=medium
+
+  * Fix for systemd unit files.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Wed, 29 Apr 2015 12:39:01 +0200
+
 gandi-hosting-vm2 (2.5-2) unstable; urgency=medium
 
   * Fix for RPM packaging.
