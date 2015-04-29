@@ -7,7 +7,9 @@
 
 [Unit]
 Description=Gandi-bootstrap early setup the system
-DefaultDependencies=no
+DefaultDependencies=true
+ConditionPathIsReadWrite=/
+After=local-fs.target remote-fs.target
 
 [Service]
 Type=simple

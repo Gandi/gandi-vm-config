@@ -7,7 +7,9 @@
 
 [Unit]
 Description=Gandi-postboot start customer setup script
-DefaultDependencies=no
+DefaultDependencies=true
+ConditionPathIsReadWrite=/
+After=local-fs.target remote-fs.target
 
 [Service]
 Type=simple
