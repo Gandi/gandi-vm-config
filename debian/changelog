@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.5-4) unstable; urgency=medium
+
+  * Silent grep.
+
+ -- Emerick Mounoury <emerick@gandi.net>  Thu, 30 Apr 2015 15:48:48 +0200
+
 gandi-hosting-vm2 (2.5-3) unstable; urgency=medium
 
   * Fix for systemd unit files.
