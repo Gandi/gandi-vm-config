@@ -1,5 +1,7 @@
 # Debian packaging Makefile
 
+OS = $(shell uname -s)
+OS : sh = uname -s
 SHELL=/bin/bash
 PKGNAME=gandi-hosting-vm2
 HOME_=/home/package
@@ -34,12 +36,21 @@ install:
 	install -d -m 0750 $(DESTDIR)/etc/gandi/hooks
 	install -m 0750 ./hooks/*			$(DESTDIR)/etc/gandi/hooks/
 	
+ifeq ($(OS),Linux)
 	mkdir -p $(DESTDIR)/etc/udev/rules.d
 	install -m 0640 ./udev/gandi.rules		$(DESTDIR)/etc/udev/rules.d/86-gandi.rules
 	install -d -m 0755 $(DESTDIR)/lib/udev
 	install -m 0755 ./udev/cpu_online.script	$(DESTDIR)/lib/udev/cpu_online
 	install -m 0755 ./udev/manage_memory.script	$(DESTDIR)/lib/udev/manage_memory
 	install -m 0755 ./udev/fake_blkid.script	$(DESTDIR)/lib/udev/fake_blkid
+
+	# we copy the systemd files in the debian packages. If systemd is not
+	# installed, these files are useless
+	install -d -m 0755 $(DESTDIR)/usr/share/gandi/systemd
+	for elt in ./systemd/system/*.service; do \
+	    install -m 0644 $$elt $(DESTDIR)/usr/share/gandi/systemd/; \
+	done
+endif
 	
 	install -d -m 0755 $(DESTDIR)/etc/default
 	install -m 0644 ./gandi-config/gandi-config.default 	$(DESTDIR)/etc/default/gandi
@@ -49,13 +60,6 @@ install:
 	install -m 0755 ./gandi-mount/gandi-mount	$(DESTDIR)/etc/init.d
 	install -m 0755 ./gandi-config/gandi-postboot	$(DESTDIR)/etc/init.d
 	install -m 0755 ./gandi-config/gandi-bootstrap	$(DESTDIR)/etc/init.d
-	
-	# we copy the systemd files in the debian packages. If systemd is not
-	# installed, these files are useless
-	install -d -m 0755 $(DESTDIR)/usr/share/gandi/systemd
-	for elt in ./systemd/system/*.service; do \
-	    install -m 0644 $$elt $(DESTDIR)/usr/share/gandi/systemd/; \
-	done
 	
 deb:
 	debuild -us -uc -b || dpkg-buildpackage -rfakeroot -uc -b
