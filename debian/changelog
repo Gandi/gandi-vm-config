@@ -1,3 +1,15 @@
+gandi-hosting-vm2 (2.5-5) unstable; urgency=medium
+
+  * New release.
+
+  [Baloo]
+   - fixup missing swapon after reboot
+
+  [chty]
+   - install specific Linux things when needed
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 10 Jun 2015 11:36:23 +0200
+
 gandi-hosting-vm2 (2.5-4) unstable; urgency=medium
 
   * Silent grep.
