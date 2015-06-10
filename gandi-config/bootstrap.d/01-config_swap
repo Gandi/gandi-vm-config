@@ -173,6 +173,8 @@ if [ -e "$swap_device" ]; then
                     fi
                 fi
             fi
+        else
+            enable_swap "$swap_device" "$device_type"
         fi
     fi
 fi
