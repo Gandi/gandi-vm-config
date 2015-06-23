@@ -109,7 +109,7 @@ setup_in_swap() {
             install=1
         fi
 
-        if [ $install = 1 ]; then
+        if [ $install -eq 1 ]; then
             cd $baserep
             tar -x $taropts -f "${gdir}/${kernel_ver}-modules.tar.$fileext"
             rm -f "${gdir}/${kernel_ver}-modules.tar.$fileext"
