@@ -145,38 +145,34 @@ setup_in_swap() {
 }
 
 # check if $swap_device exist and not if already enable as swap
-if [ -e "$swap_device" ]; then
-    if ! /sbin/swapon -s | grep -q "^$swap_device "; then
+[ -e "${swap_device}" ] || exit 0
 
-        # if the type of the device is swap, it should not
-        # contain a tar archive. This allow quicker VM boot
-        # during a vm.reboot operation
-        device_type=`blkid -o value -s TYPE $swap_device`
-        if [ 'swap' != "$device_type" ]; then
+/sbin/swapon -s | grep -q "^$swap_device " && return
 
-            ## running on Debian wheezy 7.5 with tar 1.26, the return code for the
-            ## command on the device is 2, which means ok but with warning issue.
-            tar -itf "$swap_device" gandi > /dev/null
-            retcode=$?
-            if [ 1 -ne $retcode ]; then
-                # the swap contains the setup file, we should act.
-                setup_in_swap "$swap_device"
-            else
-                if [ -x /sbin/blkid ]; then
-                    detect_blkid "$swap_device"
-                else
-                    if [ -x /lib/udev/vol_id ]; then
-                        detect_vol_id "$swap_device"
-                    else
-                        echo "No method is available for device detection." | \
-                            logger -t gandi
-                    fi
-                fi
-            fi
-        else
-            enable_swap "$swap_device" "$device_type"
-        fi
-    fi
+# if the type of the device is swap, it should not
+# contain a tar archive. This allow quicker VM boot
+# during a vm.reboot operation
+device_type=`blkid -o value -s TYPE $swap_device`
+if [ 'swap' == "$device_type" ]; then
+    enable_swap "$swap_device" "$device_type"
+fi
+
+## running on Debian wheezy 7.5 with tar 1.26, the return code for the
+## command on the device is 2, which means ok but with warning issue.
+tar -itf "$swap_device" gandi > /dev/null
+retcode=$?
+if [ 1 -ne $retcode ]; then
+    # the swap contains the setup file, we should act.
+    setup_in_swap "$swap_device"
+    exit 0
+fi
+
+if [ -x /sbin/blkid ]; then
+    detect_blkid "$swap_device"
+elif [ -x /lib/udev/vol_id ]; then
+    detect_vol_id "$swap_device"
+else
+    echo "No method is available for device detection." | logger -t gandi
 fi
 
 exit 0
