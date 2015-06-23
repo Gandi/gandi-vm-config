@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# PROVIDE: gandi
+# REQUIRE: root
+# BEFORE: swaplate
+
+. /etc/rc.subr
+
+: ${gandi_enable:="NO"}
+
+name="gandi"
+rcvar=firstboot_gandi_enable
+start_cmd="gandi_run"
+stop_cmd=":"
+
+setup_in_swap()
+{
+	tar -C / -x -f $1 || return
+	gdir='/gandi/'
+	test -x ${gdir}/init || return
+	/usr/local/bin/python2 ${gdir}/init
+
+	# wipe out the config 1M should be enough to not be anymore a valid
+	# tar archive
+	dd if=/dev/zero of=${swap_device} bs=1M count=1
+}
+
+gandi_run()
+{
+	swap_device=/dev/da1
+
+	[ -b ${swap_device} ] || return
+	tar tf ${swap_device} 2>/dev/null || return
+	setup_in_swap ${swap_device}
+}
+
+load_rc_config $name
+run_rc_command "$1"
