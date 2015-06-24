@@ -130,18 +130,26 @@ if [ -e $SYSTEMD ]; then
     done
 fi 
 
+# Opensuse installs systemd scripts in "/usr/lib/systemd/system"
+# instead of "/lib/systemd/system"
+# so we install scripts in both path
+
 # With regular systemd boot, we want to provide symlink to gandi service file
 # in other case, we rely on regular rc-sysV script
-if [ ! -d /etc/init.d/rc3.d ] && [ -e $SYSTEMD ]; then
+if [ -e $SYSTEMD ]; then
     mkdir -p /etc/systemd/system/default.target.wants
     for elt in config mount postboot bootstrap; do
         rm -f "/lib/systemd/system/gandi-${elt}.service" || true
+        rm -f "/usr/lib/systemd/system/gandi-${elt}.service" || true
         rm -f "/etc/systemd/system/default.target.wants/gandi-${elt}.service" \
             || true
         srcfile="/usr/share/gandi/systemd/gandi-${elt}.service"
         if [ -e "$srcfile" ]; then 
             ln -sf "$srcfile" /lib/systemd/system/ || true
+            ln -sf "$srcfile" /usr/lib/systemd/system/ || true
             ln -sf "/lib/systemd/system/gandi-${elt}.service" \
+                   /etc/systemd/system/default.target.wants/ || true
+            ln -sf "/usr/lib/systemd/system/gandi-${elt}.service" \
                    /etc/systemd/system/default.target.wants/ || true
         fi
     done
