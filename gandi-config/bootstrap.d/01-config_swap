@@ -152,7 +152,7 @@ setup_in_swap() {
 # contain a tar archive. This allow quicker VM boot
 # during a vm.reboot operation
 device_type=`blkid -o value -s TYPE $swap_device`
-if [ 'swap' == "$device_type" ]; then
+if [ 'swap' = "$device_type" ]; then
     enable_swap "$swap_device" "$device_type"
 fi
 
