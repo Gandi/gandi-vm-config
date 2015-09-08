@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.5-7) unstable; urgency=medium
+
+  * Fix typo.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 08 Sep 2015 11:24:00 +0200
+
 gandi-hosting-vm2 (2.5-6) unstable; urgency=medium
 
   * New release.
