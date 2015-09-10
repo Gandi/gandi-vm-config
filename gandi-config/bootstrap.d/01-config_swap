@@ -71,11 +71,9 @@ detect_vol_id() {
 
 # params: $1 is swap device
 setup_in_swap() {
-    ## running on Debian wheezy 7.5 with tar 1.26, the return code for the
-    ## command on the device is 2, which means ok but with warning issue.
     tar -C / -x -i -f "$1"
-    retcode=$?
-    [ 1 -ne $retcode ] || return
+    [ 1 -ne $? ] || return
+
     gdir='/gandi/'
     keep_ro=0
 
@@ -158,9 +156,11 @@ fi
 
 ## running on Debian wheezy 7.5 with tar 1.26, the return code for the
 ## command on the device is 2, which means ok but with warning issue.
-tar -itf "$swap_device" gandi > /dev/null
-retcode=$?
-if [ 1 -ne $retcode ]; then
+## running on Debian with tar 1.27, the return code for the command on the
+## device is 0, return code 2 is an error
+tar_text=`tar -itf "$swap_device" gandi 2>&1`
+if [ 1 -ne $? ] && \
+   ! `echo "$tar_text" | tail -3 | grep -q 'gandi: Not found in archive'`; then
     # the swap contains the setup file, we should act.
     setup_in_swap "$swap_device"
     exit 0
