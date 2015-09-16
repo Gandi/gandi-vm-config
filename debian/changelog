@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.6) unstable; urgency=medium
+
+  * New release, fix tar archive detection in swap space
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 16 Sep 2015 17:08:45 +0200
+
 gandi-hosting-vm2 (2.5-7) unstable; urgency=medium
 
   * Fix typo.
