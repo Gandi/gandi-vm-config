@@ -1,5 +1,0 @@
-Practical command to build :
-
-make clean && \
-make build && \
-make rpm
