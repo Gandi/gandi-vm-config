@@ -11,13 +11,9 @@ DESTDIR=./debian/$(PKGNAME)
 
 VERSION = $(shell head -1 debian/changelog | egrep -o '\(.*\)' | sed -e 's/[()]//g')
 VERSION_MAJOR = $(shell echo $(VERSION) | cut -d'-' -f1)
-VERSION_MINOR = $(shell echo $(VERSION) | cut -d'-' -f2)
 
 default:
 	@echo "Nothing."
-
-version:
-	@echo VERSION: $(VERSION) and VERSION_MAJOR: $(VERSION_MAJOR) and VERSION_MINOR: $(VERSION_MINOR)
 
 install:
 	install -d $(DESTDIR)/etc/gandi
@@ -65,7 +61,7 @@ deb:
 	debuild -us -uc -b || dpkg-buildpackage -rfakeroot -uc -b
 
 dist:   deb
-	# install
+	# prepare files from deb build process
 	rm -rf debian/$(PKGNAME)-$(VERSION_MAJOR)
 	mkdir debian/$(PKGNAME)-$(VERSION_MAJOR)
 	cp -rf debian/$(PKGNAME)/* debian/$(PKGNAME)-$(VERSION_MAJOR)/
@@ -73,7 +69,7 @@ dist:   deb
 	    debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/sysconfig
 	cp debian/changelog debian/$(PKGNAME)-$(VERSION_MAJOR)/
 	
-	# compression
+	# create the tarball used during the rpm build process
 	gzip -9 debian/$(PKGNAME)-$(VERSION_MAJOR)/changelog
 	cd debian && tar cjf $(PKGNAME)-$(VERSION).tar.bz2 \
 	    $(PKGNAME)-$(VERSION_MAJOR)
@@ -83,7 +79,6 @@ rpm:	dist
 	
 	# prepare the spec file for the build of the current version 
 	sed -e "s/\(%changelog\)/\1\n* $(shell date +"%a %b %d %Y") Gandi Maintainer <noc@gandi.net> $(VERSION)gnd\n- Bug fixing for packaging and scripts. See \/usr\/share\/doc\/$(PKGNAME)\/changelog.gz.\n/" \
-	  -e "s/^\(%define release \).*/\1$(VERSION_MINOR)/" \
 	  -e "s/^\(%define version \).*/\1$(VERSION_MAJOR)/" \
 	  rpm/$(PKGNAME).spec > $(RPMBUILDROOT)/SPECS/$(PKGNAME).spec
 	
@@ -95,23 +90,11 @@ rpm:	dist
 	sudo chroot ${RPMCHROOT} su - package -c "rpm -ba rpm/SPECS/$(PKGNAME).spec"
 
 rpm-repository:
-	cp rpm/repos/generate-repository.sh ${RPMCHROOT}/${HOME_}/
+	install -m 0755 rpm/repos/generate-repository.sh ${RPMCHROOT}/${HOME_}/
 	sudo chroot ${RPMCHROOT} su - package -c "./generate-repository.sh"
-	for d in mandriva mageia fedora centos opensuse; do \
-	  rm -rf /srv/mirror/hosting.dev/$$d; \
-	  rsync -avH --delete \
-	     ${RPMCHROOT}/${HOME_}/repository/$$d \
-	     build2-mass.mgt.gandi.net::repo/hosting.dev/; \
-	done
 
-rsync:
-	rsync -av ../$(PKGNAME)*$(VCREV)*.deb build2-mass.mgt.gandi.net::repo/hosting.dev/common
-
-all: clean rpm rsync
-	@echo -e "\nMay I suggest you to 'make rpm-repository' and then build the repository in the main system ?\n"
-
-jenkins: all
-	make rpm-repository
+all: clean rpm
+	@echo -e "Build rpm repository with 'make rpm-repository'."
 
 complete-clean: clean
 	for ext in deb changes tar.gz; do \
@@ -124,5 +107,4 @@ clean:
 	@rm -rf debian/$(PKGNAME).other
 	@rm -rf debian/$(PKGNAME)-1*
 	@rm -rf debian/$(PKGNAME).tar
-	@rm -f configure-stamp build-stamp
 	@dh_clean
