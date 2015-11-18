@@ -4,9 +4,7 @@ OS = $(shell uname -s)
 OS : sh = uname -s
 SHELL=/bin/bash
 PKGNAME=gandi-hosting-vm2
-HOME_=/home/package
-RPMCHROOT=${HOME_}/chroot-rpm-build
-RPMBUILDROOT=${RPMCHROOT}/${HOME_}/rpm/
+RPMBUILDROOT=./rpm/
 DESTDIR=./debian/$(PKGNAME)
 
 VERSION = $(shell head -1 debian/changelog | egrep -o '\(.*\)' | sed -e 's/[()]//g')
@@ -82,19 +80,10 @@ rpm:	dist
 	  -e "s/^\(%define version \).*/\1$(VERSION_MAJOR)/" \
 	  rpm/$(PKGNAME).spec > $(RPMBUILDROOT)/SPECS/$(PKGNAME).spec
 	
-	# add the postinst fix script
 	install -m 0750 rpm/postinst-fix-mandriva.sh \
 	    $(RPMBUILDROOT)/SOURCES/postinst-fix-mandriva.sh
 		
-	# build the rpm package in the chroot
-	sudo chroot ${RPMCHROOT} su - package -c "rpm -ba rpm/SPECS/$(PKGNAME).spec"
-
-rpm-repository:
-	install -m 0755 rpm/repos/generate-repository.sh ${RPMCHROOT}/${HOME_}/
-	sudo chroot ${RPMCHROOT} su - package -c "./generate-repository.sh"
-
-all: clean rpm
-	@echo -e "Build rpm repository with 'make rpm-repository'."
+	rpmbuild -bb rpm/SPECS/$(PKGNAME).spec
 
 complete-clean: clean
 	for ext in deb changes tar.gz; do \
