@@ -4,14 +4,14 @@
 
 %define name    gandi-hosting-vm2
 %define version 1.2
-%define release 1474
+%define release 1
 %define sourcedir	%{_topdir}/BUILD/%{name}-%{version}
 
 Name:           %{name} 
 Summary:        Script for GANDI hosting virtual machine.
 Version:        %{version} 
 Release:        %{release} 
-Source0:        %{name}-%{version}-%{release}.tar.bz2
+Source0:        %{name}-%{version}.tar.bz2
 URL:            http://www.gandi.net/hosting/ 
 License:	Gandi License
 BuildArch: 	noarch
