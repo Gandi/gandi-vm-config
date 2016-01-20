@@ -23,10 +23,9 @@ install:
 	install -m 0640 ./maintainer.gandi.key		$(DESTDIR)/etc/gandi/
 	install -m 0640 ./sysctl.conf			$(DESTDIR)/etc/gandi/
 	install -m 0640 ./gandi-config/plugins-lib	$(DESTDIR)/etc/gandi/
-	
 	install -d -m 0750 $(DESTDIR)/usr/share/gandi/bootstrap.d
 	install -m 0750 ./gandi-config/bootstrap.d/*	$(DESTDIR)/usr/share/gandi/bootstrap.d/
-	
+	install -m 0750 ./get_json.py			$(DESTDIR)/usr/share/gandi/
 	install -d -m 0750 $(DESTDIR)/etc/gandi/hooks
 	install -m 0750 ./hooks/*			$(DESTDIR)/etc/gandi/hooks/
 	
