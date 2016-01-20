@@ -3,6 +3,13 @@
 
 #export DH_VERBOSE=1
 
+# -------------------
+# In a near futur, will should be able to replace all
+# the Makefile entries with:
+#%:
+#	dh $@
+# -------------------
+
 build:
 	dh_testdir
 
