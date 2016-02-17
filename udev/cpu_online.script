@@ -7,8 +7,14 @@ if [ ! -n "$DEVPATH" ]; then
     exit 1
 fi
 
-if [ -e "/sys/$DEVPATH/online" ]; then
-    echo 1 > /sys/$DEVPATH/online
+if [ `basename $DEVPATH` = 'cpu0' ]; then
+    exit 0
 fi
+
+while [ ! -e "/sys/$DEVPATH/online" ]; do
+    sleep 0.1
+done
+
+echo 1 > /sys/$DEVPATH/online
 
 exit 0
