@@ -1,3 +1,11 @@
+gandi-hosting-vm2 (2.7) unstable; urgency=medium
+
+  * no DHCP call if IPv6 only,
+  * fix vCPU online activation,
+  * resizefs less verbose during boot.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Thu, 16 Jun 2016 17:57:27 +0200
+
 gandi-hosting-vm2 (2.6) unstable; urgency=medium
 
   * New release, fix tar archive detection in swap space
