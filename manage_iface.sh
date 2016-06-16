@@ -60,16 +60,16 @@ iface_link_up() {
 }
 
 iface_up() {
-    iface_link_up $1
-
-    # then we can call dhclient
-    rm -f /var/lib/dhclient.eth0.leases
-    rm -f /var/lib/dhclient.leases
-    dhbin="/sbin/dhclient"
-    [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
-    $dhbin -1 -q $1
-
-    stop_dhcp_client $1
+    # When the iface is IPv6 only, no need to start the DHCP client and
+    # wait for a couple of seconds.
+    /usr/share/gandi/get_json.py need_dhcp_config
+    if [ $? -eq 0 ]; then
+        rm -f /var/lib/dhclient.eth0.leases /var/lib/dhclient.leases
+        dhbin="/sbin/dhclient"
+        [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
+        $dhbin -1 -q $1
+        stop_dhcp_client $1
+    fi
 
     if [ -e /sys/module/virtio_net ] && [ $CONFIG_MULTIQUEUE -eq 1 ]; then
         virtio_config $1
@@ -110,12 +110,12 @@ fi
 
 case "$ACTION" in
     "add")
-        iface_link_up $INTERFACE
         NODHCP=$CONFIG_NODHCP
+        iface_link_up "${INTERFACE}"
         if [ "$CONFIG_NODHCP" = "${NODHCP/$INTERFACE/}" ]; then 
             echo "Setup of $INTERFACE" | logger -t gandi
-            iface_up $INTERFACE 
-            sysctl_config $INTERFACE
+            iface_up "${INTERFACE}"
+            sysctl_config "${INTERFACE}"
 
             if [ -e "$GANDI_HOOK_DIR"/post-iface-attach ]; then
                 "$GANDI_HOOK_DIR"/post-iface-attach
