@@ -15,4 +15,5 @@ After=local-fs.target remote-fs.target
 Type=simple
 RemainAfterExit=no
 ExecStart=/etc/init.d/gandi-bootstrap start
+ExecStopPost=/etc/init.d/gandi-postboot start
 
