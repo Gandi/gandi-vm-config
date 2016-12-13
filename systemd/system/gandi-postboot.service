@@ -7,12 +7,13 @@
 
 [Unit]
 Description=Gandi-postboot start customer setup script
-DefaultDependencies=true
-ConditionPathIsReadWrite=/
-After=local-fs.target remote-fs.target
 
 [Service]
-Type=simple
-RemainAfterExit=no
+Type=oneshot
 ExecStart=/etc/init.d/gandi-postboot start
+RemainAfterExit=yes
+SysVStartPriority=99
+
+[Install]
+WantedBy=multi-user.target
 
