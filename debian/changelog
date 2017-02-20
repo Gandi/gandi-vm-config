@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.9) unstable; urgency=medium
+
+  * New release with bugfixes for systemd and swap activation
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 20 Feb 2017 15:25:07 +0100
+
 gandi-hosting-vm2 (2.8) unstable; urgency=medium
 
   * Improve systemd support with patch by 
