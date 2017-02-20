@@ -425,7 +425,7 @@ def detect_devicename(re_deviceline, pattern_id):
 
 def writable_root():
     """ Check if the root partition is writable. """
-    if posix.access('/', posix.W_OK):
+    if posix.access('/', posix.W_OK) or os.environ['TAGS'] == ':systemd:':
         return True
     return False
 
