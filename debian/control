@@ -9,7 +9,7 @@ Package: gandi-hosting-vm2
 Architecture: all
 Depends: openssl,
  udev,
- initscripts,
+ initscripts | systemd,
  bind9-host,
  sed (>= 4),
  module-init-tools | kmod,
