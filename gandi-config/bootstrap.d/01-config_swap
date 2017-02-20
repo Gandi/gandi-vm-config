@@ -38,7 +38,7 @@ create_swap() {
 # params: $1 is swap device, $2 is type
 enable_swap() {
     if expr match "swap|SWAP|Swap" "$2" > /dev/null; then
-        swapon "$1"
+        swapon "$1" > /dev/null 2>&1
     fi
 }
 
@@ -144,7 +144,8 @@ setup_in_swap() {
 # check if $swap_device exist and not if already enable as swap
 [ -e "${swap_device}" ] || exit 0
 
-/sbin/swapon -s | grep -q "^$swap_device " && return
+# if the swap device is already activated, we stop there
+/sbin/swapon -s | grep -q "^$swap_device " && exit 0
 
 # if the type of the device is swap, it should not
 # contain a tar archive. This allow quicker VM boot
@@ -152,6 +153,7 @@ setup_in_swap() {
 device_type=`blkid -o value -s TYPE $swap_device`
 if [ 'swap' = "$device_type" ]; then
     enable_swap "$swap_device" "$device_type"
+    exit 0
 fi
 
 ## running on Debian wheezy 7.5 with tar 1.26, the return code for the
