@@ -32,7 +32,6 @@ ensure_safe() {
 create_swap() {
     mkswap -L swap -v1 -f "$1" > /dev/null || \
       mkswap -L swap -v1 "$1" > /dev/null
-    enable_swap "$1" "swap"
 }
 
 # params: $1 is swap device, $2 is type
@@ -71,8 +70,8 @@ detect_vol_id() {
 
 # params: $1 is swap device
 setup_in_swap() {
-    tar -C / -x -i -f "$1"
-    [ 1 -ne $? ] || return
+    dd if=$1 bs=4k skip=128 | tar -C / -x -f -
+    [ $? -eq 0 ] || return
 
     gdir='/gandi/'
     keep_ro=0
@@ -146,25 +145,10 @@ setup_in_swap() {
 
 /sbin/swapon -s | grep -q "^$swap_device " && return
 
-# if the type of the device is swap, it should not
-# contain a tar archive. This allow quicker VM boot
-# during a vm.reboot operation
-device_type=`blkid -o value -s TYPE $swap_device`
-if [ 'swap' = "$device_type" ]; then
-    enable_swap "$swap_device" "$device_type"
-fi
-
-## running on Debian wheezy 7.5 with tar 1.26, the return code for the
-## command on the device is 2, which means ok but with warning issue.
-## running on Debian with tar 1.27, the return code for the command on the
-## device is 0, return code 2 is an error
-tar_text=`tar -itf "$swap_device" gandi 2>&1`
-if [ 1 -ne $? ] && \
-   ! `echo "$tar_text" | tail -3 | grep -q 'gandi: Not found in archive'`; then
-    # the swap contains the setup file, we should act.
-    setup_in_swap "$swap_device"
-    exit 0
-fi
+# If a valid tar archive extracts with no error at offset 4k*128,
+# use it. Otherwise continue with swap creation logic.
+dd if=$swap_device bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null \
+	&& setup_in_swap $swap_device
 
 if [ -x /sbin/blkid ]; then
     detect_blkid "$swap_device"
