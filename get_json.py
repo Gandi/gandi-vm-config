@@ -9,20 +9,25 @@ configfile = '/gandi/config'
 
 
 def help_():
-    print("Usage: %s (need_dhcp_config|help)" % sys.argv[0])
+    print("Usage: %s (need_dhcp_config <num>|help)" % sys.argv[0])
     print("\t- help: this help")
-    print("\t- need_dhcp_config: need to call the DHCP client")
+    print("\t- need_dhcp_config <num>: need to call the DHCP client on the")
+    print("\t     network interface number <num> in the system.")
 
 
 def need_dhcp_config(file_, ifaceid):
-    """ Detect if the interface is IPv4 enable and need DHCP configuration """
+    """
+    Detect if the interface is IPv4 enable and need DHCP configuration
+    Return: 0 is ok for DHCP call, 2 is not ok for DHCP, 3 for not found in the config
+    """
     with open(file_, 'r') as jsonfile:
         content = json.load(jsonfile)
-    vifs = [vif for vif in content['vif'] if vif['vif_number'] == ifaceid]
-    if not vifs:
-        return False
-    ipv6_only = is_ipv6_only(content)
-    return not ipv6_only or False
+    vifs = [vif for vif in content['vif'] if vif['vif_number'] == int(ifaceid)]
+    if len(vifs) == 0:
+        return 3
+    if is_ipv6_only(content):
+         return 2
+    return 0
 
 
 def is_ipv6_only(conf):
@@ -52,15 +57,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == 'need_dhcp_config':
             ifaceid = 0
-            if sys.argv[2]:
+            if len(sys.argv) > 2 and sys.argv[2]:
                 ifaceid = sys.argv[2]
-            if os.path.exists(configfile):
-                if need_dhcp_config(configfile, ifaceid):
-                    sys.exit(0)
-                else:
-                    sys.exit(1)
-            else:
+            if not os.path.exists(configfile):
                 print('Configuration file is not present: %s' % configfile)
-                sys.exit(2)
+                sys.exit(1)
+            sys.exit(need_dhcp_config(configfile, ifaceid))
         if sys.argv[1] == 'help':
             help_()

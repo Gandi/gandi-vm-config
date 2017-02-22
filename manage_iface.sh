@@ -62,13 +62,20 @@ iface_link_up() {
 iface_up() {
     # When the iface is IPv6 only, no need to start the DHCP client and
     # wait for a couple of seconds.
-    /usr/share/gandi/get_json.py need_dhcp_config
-    if [ $? -eq 0 ]; then
+
+    # for now, iface name has a pattern ethX
+    iface_num=`echo "$1" | sed -e 's/eth//'`
+
+    # if DHCP is mandatory (0) or if the network iface is not defined in the
+    # configuration file available at boot time (3).
+    /usr/share/gandi/get_json.py need_dhcp_config $iface_num
+    dhcp_code=$?
+    if [ 0 -eq $dhcp_code ] || [ 3 -eq $dhcp_code ]; then
         rm -f /var/lib/dhclient.eth0.leases /var/lib/dhclient.leases
         dhbin="/sbin/dhclient"
         [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
-        $dhbin -1 -q $1
-        stop_dhcp_client $1
+        $dhbin -1 -q "$1"
+        stop_dhcp_client "$1"
     fi
 
     if [ -e /sys/module/virtio_net ] && [ $CONFIG_MULTIQUEUE -eq 1 ]; then
@@ -129,4 +136,5 @@ case "$ACTION" in
 esac
 
 exit 0
+
 # vim:ft=python:et:sw=4:ts=4:sta:tw=79:fileformat=unix
