@@ -70,7 +70,7 @@ detect_vol_id() {
 
 # params: $1 is swap device
 setup_in_swap() {
-    dd if=$1 bs=4k skip=128 | tar -C / -x -f -
+    dd if=$1 bs=4k skip=128 2> /dev/null | tar -C / -x -f -
     [ $? -eq 0 ] || return
 
     gdir='/gandi/'
@@ -148,7 +148,7 @@ setup_in_swap() {
 
 # If a valid tar archive extracts with no error at offset 4k*128,
 # use it. Otherwise continue with swap creation logic.
-dd if=$swap_device bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null \
+dd if=$swap_device bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null > /dev/null \
     && setup_in_swap $swap_device
 
 if [ -x /sbin/blkid ]; then
