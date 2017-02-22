@@ -37,21 +37,29 @@ mkdir -p $RPM_BUILD_ROOT/etc/gandi
 cp -raf %{sourcedir}/etc/gandi	$RPM_BUILD_ROOT/etc/
 
 install -d -m 0755 $RPM_BUILD_ROOT/usr/share/gandi
-cp -raf %{_topdir}/SOURCES/postinst-fix-mandriva.sh \
+install -m 0755 %{_topdir}/SOURCES/postinst-fix-mandriva.sh \
     $RPM_BUILD_ROOT/usr/share/gandi/fix-mandriva.sh
 cp -raf %{sourcedir}/usr/share/gandi/systemd \
     $RPM_BUILD_ROOT/usr/share/gandi/
 cp -raf %{sourcedir}/usr/share/gandi/bootstrap.d \
     $RPM_BUILD_ROOT/usr/share/gandi/
 
+install -m 0750 %{sourcedir}/usr/share/gandi/get_json.py \
+    $RPM_BUILD_ROOT/usr/share/gandi/
+
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
-cp -raf %{sourcedir}/etc/init.d/gandi-config    $RPM_BUILD_ROOT/etc/init.d
-cp -raf %{sourcedir}/etc/init.d/gandi-postboot  $RPM_BUILD_ROOT/etc/init.d
-cp -raf %{sourcedir}/etc/init.d/gandi-bootstrap $RPM_BUILD_ROOT/etc/init.d
-cp -raf %{sourcedir}/etc/init.d/gandi-mount     $RPM_BUILD_ROOT/etc/init.d
+install -m 0755 %{sourcedir}/etc/init.d/gandi-config \
+    $RPM_BUILD_ROOT/etc/init.d
+install -m 0755 %{sourcedir}/etc/init.d/gandi-postboot \
+    $RPM_BUILD_ROOT/etc/init.d
+install -m 0755 %{sourcedir}/etc/init.d/gandi-bootstrap \
+    $RPM_BUILD_ROOT/etc/init.d
+install -m 0755 %{sourcedir}/etc/init.d/gandi-mount \
+    $RPM_BUILD_ROOT/etc/init.d
 
 mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
-cp -raf %{sourcedir}/etc/sysconfig/gandi $RPM_BUILD_ROOT/etc/sysconfig/
+install -m 0644 %{sourcedir}/etc/sysconfig/gandi \
+    $RPM_BUILD_ROOT/etc/sysconfig/
 
 mkdir -p $RPM_BUILD_ROOT/etc/udev/rules.d
 cp -raf %{sourcedir}/etc/udev/rules.d/	$RPM_BUILD_ROOT/etc/udev/
