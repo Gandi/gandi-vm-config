@@ -224,6 +224,7 @@ rm -rf $RPM_BUILD_ROOT
 /lib/udev/cpu_online
 /lib/udev/manage_memory
 /lib/udev/fake_blkid
+/usr/share/gandi/get_json.py
 %config(noreplace) /etc/gandi/hooks/*
 %defattr(0644,root,root)
 %config(noreplace) /etc/sysconfig/gandi
