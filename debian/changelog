@@ -1,3 +1,12 @@
+gandi-hosting-vm2 (2.10) unstable; urgency=medium
+
+  * Avoid breaking SSHd config by adding a newline
+  * Refactor detection for DHCP configuration call
+  * Avoid useless print of information during boot
+  * Improve list of dependencies in systemd unit files
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Thu, 09 Mar 2017 18:17:19 +0100
+
 gandi-hosting-vm2 (2.9) unstable; urgency=medium
 
   * New release with bugfixes for systemd and swap activation
