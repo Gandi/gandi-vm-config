@@ -1,3 +1,15 @@
+gandi-hosting-vm2 (2.12) unstable; urgency=medium
+
+  * Revert a unfinished feature.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 28 Mar 2017 09:56:52 +0200
+
+gandi-hosting-vm2 (2.11) unstable; urgency=medium
+
+  * Release with small bugxfixes.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 24 Mar 2017 09:52:29 +0200
+
 gandi-hosting-vm2 (2.10) unstable; urgency=medium
 
   * Avoid breaking SSHd config by adding a newline
