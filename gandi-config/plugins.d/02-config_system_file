@@ -46,7 +46,9 @@ if [ ! -d /proc/xen ]; then
     device_name=sda
 fi
 
-if [ ! -e "$config_file" ] || ( ! grep ^/dev/"$device_name" "$config_file" > /dev/null ); then
+if [ ! -e "$config_file" ] || \
+   ( ! egrep "^(UUID=|LABEL=|/dev/"$device_name").*/[\t ]*ext" \
+       "$config_file" > /dev/null ); then
     [ -e "$config_file" ] && mv "$config_file" "${config_file}".ga-old
     cat > "$config_file" << EOT
 /dev/$device_name    /                 ext4    rw,noatime,errors=remount-ro  0    1
