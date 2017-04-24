@@ -3,10 +3,15 @@
 # author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
 # all rights reserved.
 
+# legacy without partitions
 swap_device=/dev/xvda2
+# GPT
+if [ -b /dev/disk/by-label/swap ]; then
+    swap_device=/dev/disk/by-label/swap
 # freebsd
-if [ -b /dev/da1 ]; then
+elif [ -b /dev/da1 ]; then
     swap_device=/dev/da1
+# legacy with partitions
 elif [ ! -d /proc/xen ]; then
     swap_device=/dev/sdb
 fi
