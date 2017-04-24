@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.13) unstable; urgency=medium
+
+  * Prepare for the new swap system beginning with FR-SD3
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 24 Apr 2017 15:43:33 +0200
+
 gandi-hosting-vm2 (2.12) unstable; urgency=medium
 
   * Revert a unfinished feature.
