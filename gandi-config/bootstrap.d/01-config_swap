@@ -6,8 +6,12 @@
 # legacy without partitions
 swap_device=/dev/xvda2
 # GPT
-if [ -b /dev/disk/by-label/swap ]; then
+if [ -b /dev/disk/by-partlabel/gandiswap ]; then
+    swap_device=/dev/disk/by-partlabel/gandiswap
+elif [ -b /dev/disk/by-label/swap ]; then
     swap_device=/dev/disk/by-label/swap
+elif [ -b /dev/xvdz ]; then
+    swap_device=/dev/xvdz
 # freebsd
 elif [ -b /dev/da1 ]; then
     swap_device=/dev/da1
