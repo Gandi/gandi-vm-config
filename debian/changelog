@@ -1,3 +1,10 @@
+gandi-hosting-vm2 (2.15) unstable; urgency=medium
+
+  * Prepare for the new swap system beginning with FR-SD3 
+    and use GPT label
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Thu, 27 Apr 2017 15:19:16 +0200
+
 gandi-hosting-vm2 (2.14) unstable; urgency=medium
 
   * bootstratp/01-config_swap: improve GPT disks detection
