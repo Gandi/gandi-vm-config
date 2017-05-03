@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 # author : Nicolas Chipaux <aegiap@gandi.net> for GANDI
 # all rights reserved.
+
+set -o pipefail
 
 if [ -z "$SYSLOG_TARGET" ]; then
     SYSLOG_TARGET='gandi'
@@ -17,10 +19,11 @@ if [ -e $device ]; then
 
     if [ $(expr match "$type" 'ext') -ge 3 ]; then
         resize2fs=$(which resize2fs)
-        if [ -x $resize2fs ]; then
-            if ! $resize2fs $device 2>&1 | logger -t "$SYSLOG_TARGET"; then
-                loginfo "Error in resizing disk $device, return: $?"
-                return $?
+        if [ -x "$resize2fs" ]; then
+            if ! $resize2fs "$device" 2>&1 | logger -t "$SYSLOG_TARGET"; then
+                err_code="$?"
+                loginfo "Error resizing ext disk ${device}, return: ${err_code}"
+                exit "${err_code}"
             fi
         fi
     fi
@@ -28,9 +31,10 @@ if [ -e $device ]; then
     if [ $(expr match "$type" 'xfs') -ge 3 ]; then
         xfscmd=$(which xfs_growfs)
         if [ -x "$xfscmd" ]; then
-            if ! $xfscmd $device 2>&1 | logger -t "$SYSLOG_TARGET"; then
-                loginfo "Error in resizing disk $device, return: $?"
-                return $?
+            if ! $xfscmd "$device" 2>&1 | logger -t "$SYSLOG_TARGET"; then
+                err_code="$?"
+                loginfo "Error resizing XFS disk ${device}, return: ${err_code}"
+                exit "$err_code"
             fi
         fi
     fi
