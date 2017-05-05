@@ -58,7 +58,16 @@ detect_blkid() {
     type=$(/sbin/blkid -s TYPE "$swap_device")
     ret=$?
     if [ $ret -eq 2 ]; then
-        ensure_safe "$1" && create_swap "$1"
+        if ensure_safe "$1"; then
+            create_swap "$1"
+            type=$(/sbin/blkid -s TYPE -o value "$1")
+            if [ $? -eq 0 ]; then
+                enable_swap "$1" "$type"
+            else
+                echo 'Undefined error during swap creation.' | logger
+                echo 'Undefined error during swap creation.' >&2
+            fi
+        fi
     elif [ $ret -eq 0 ]; then
         type=$(/sbin/blkid -s TYPE -o value "$1")
         enable_swap "$1" "$type"
