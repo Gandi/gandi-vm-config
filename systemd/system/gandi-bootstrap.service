@@ -10,6 +10,6 @@ ConditionPathIsReadWrite=/
 After=local-fs.target remote-fs.target
 
 [Service]
-Type=simple
+Type=oneshot
 RemainAfterExit=no
 ExecStart=/etc/init.d/gandi-bootstrap start
