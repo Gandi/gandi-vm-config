@@ -62,7 +62,9 @@ if which sgdisk >/dev/null && [ -b "$disk" ]; then
 fi
 
 device=/dev/xvda1
-if [ ! -d /proc/xen ]; then
+if [ -b /dev/disk/by-partlabel/gandiroot ]; then
+    device=/dev/disk/by-partlabel/gandiroot
+elif [ ! -d /proc/xen ]; then
     device=/dev/sda
 fi
 
