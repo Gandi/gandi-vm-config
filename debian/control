@@ -15,7 +15,8 @@ Depends: openssl,
  module-init-tools | kmod,
  python,
  acpid,
- acpi-support-base | acpi-support
+ acpi-support-base | acpi-support,
+ gdisk
 Conflicts: gandi-hosting-agent, 
  gandi-hosting-agent-schemes,
  gandi-hosting-agent-plugins-internal-debian, 
