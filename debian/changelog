@@ -1,3 +1,14 @@
+gandi-hosting-vm2 (2.16) unstable; urgency=medium
+
+  * Add a dependency on gdisk
+  * Prevent parallel start of systemd services
+  * Always mount swap when it has been created
+  * Always resize the right filesystem
+  * Add GPT partition resize
+  * Fix error management
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 10 May 2017 11:52:36 +0200
+
 gandi-hosting-vm2 (2.15) unstable; urgency=medium
 
   * Prepare for the new swap system beginning with FR-SD3 
