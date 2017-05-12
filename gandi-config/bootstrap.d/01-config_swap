@@ -10,6 +10,8 @@ if [ -b /dev/disk/by-partlabel/gandiswap ]; then
     swap_device=/dev/disk/by-partlabel/gandiswap
 elif [ -b /dev/disk/by-label/swap ]; then
     swap_device=/dev/disk/by-label/swap
+elif [ -b /dev/xvdz1 ]; then
+    swap_device=/dev/xvdz1
 elif [ -b /dev/xvdz ]; then
     swap_device=/dev/xvdz
 # freebsd
@@ -21,8 +23,8 @@ elif [ ! -d /proc/xen ]; then
 fi
 
 # We load the default functions and configuration for gandi-config 
-[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1 
-load_config 
+[ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
+load_config
 
 # params: $1 is swap device
 ensure_safe() {
@@ -43,46 +45,53 @@ create_swap() {
       mkswap -L swap -v1 "$1" > /dev/null
 }
 
-# params: $1 is swap device, $2 is type
+# params: $1 is swap device, optional $2 is type
 enable_swap() {
-    if expr match "swap|SWAP|Swap" "$2" > /dev/null; then
-        swapon "$1" > /dev/null 2>&1
+    info="$2"
+    if [ -z "$2" ]; then
+        info=$(/sbin/blkid -s TYPE -o value "$1")
+    fi
+    if expr match "swap|SWAP|Swap" "${info}" > /dev/null ; then
+        swapon "$1" 2>&1 | logger
+    else
+        msg='Undefined error during swap creation.'
+        echo "${msg}" | logger
+        echo "${msg}." >&2
     fi
 }
 
 # params: $1 is swap device
 detect_blkid() {
-    ## According to blkid manpage: If the specified token was not found,
-    ## or no (specified) devices could be identified, an exit code of 2 is
-    ## returned.
-    type=$(/sbin/blkid -s TYPE "$swap_device")
-    ret=$?
-    if [ $ret -eq 2 ]; then
+    # Detection of GPT disk
+    info=$(/sbin/blkid -s PARTLABEL -o value "$1")
+    if [ ! -z "${info}" -a 'gandiswap' = "${info}" ]; then
         if ensure_safe "$1"; then
             create_swap "$1"
-            type=$(/sbin/blkid -s TYPE -o value "$1")
-            if [ $? -eq 0 ]; then
-                enable_swap "$1" "$type"
-            else
-                echo 'Undefined error during swap creation.' | logger
-                echo 'Undefined error during swap creation.' >&2
-            fi
+            enable_swap "$1"
         fi
-    elif [ $ret -eq 0 ]; then
-        type=$(/sbin/blkid -s TYPE -o value "$1")
-        enable_swap "$1" "$type"
+        return 0
+    fi
+
+    info=$(/sbin/blkid -s TYPE -o value "$swap_device")
+    if [ 'swap' != "${info}" ]; then
+        if ensure_safe "$1"; then
+            create_swap "$1"
+            enable_swap "$1"
+        fi
+    else
+        enable_swap "$1"
     fi
 }
 
 # params: $1 is swap device
 detect_vol_id() {
-    type=$(/lib/udev/vol_id --type "$1")
+    info=$(/lib/udev/vol_id --type "$1")
     ## vol_id returns 4 when volume type is unknown
     ret=$?
     if [ $ret -eq 4 ]; then
         ensure_safe "$1" && create_swap "$1"
     elif [ $ret -eq 0 ]; then
-        enable_swap "$1" "$type"
+        enable_swap "$1" "${info}"
     fi
 }
 
