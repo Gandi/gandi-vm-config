@@ -554,6 +554,10 @@ def main():
         on_add(device, mountpoint)
         post_add(device, fs_type, mountpoint)
 
+    # For disk in SATA, we set a bogus ID_VENDOR
+    if 'ID_VENDOR' not in os.environ:
+        os.environ['ID_VENDOR'] = 'None'
+
     if re.match('offline', os.environ['ACTION']) or \
        (re.match('remove', os.environ['ACTION']) and
         re.match('gandi\.ne', os.environ['ID_VENDOR'])):
