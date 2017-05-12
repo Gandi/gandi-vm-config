@@ -7,10 +7,13 @@
 swap_device=/dev/xvda2
 # GPT
 if [ -b /dev/disk/by-partlabel/gandiswap ]; then
+    full_device=/dev/xvdz
     swap_device=/dev/disk/by-partlabel/gandiswap
 elif [ -b /dev/disk/by-label/swap ]; then
+    full_device=/dev/xvdz
     swap_device=/dev/disk/by-label/swap
 elif [ -b /dev/xvdz1 ]; then
+    full_device=/dev/xvdz
     swap_device=/dev/xvdz1
 elif [ -b /dev/xvdz ]; then
     swap_device=/dev/xvdz
@@ -21,6 +24,8 @@ elif [ -b /dev/da1 ]; then
 elif [ ! -d /proc/xen ]; then
     swap_device=/dev/sdb
 fi
+
+[ ! -z "${full_device}" ] || full_device="${swap_device}"
 
 # We load the default functions and configuration for gandi-config 
 [ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
@@ -95,9 +100,9 @@ detect_vol_id() {
     fi
 }
 
-# params: $1 is swap device
+# params: $1 is swap device, $2 is full device
 setup_in_swap() {
-    dd if=$1 bs=4k skip=128 2> /dev/null | tar -C / -x -f -
+    dd if="$2" bs=4k skip=128 2> /dev/null | tar -C / -x -f -
     [ $? -eq 0 ] || return
 
     gdir='/gandi/'
@@ -167,16 +172,19 @@ setup_in_swap() {
     create_swap "$1"
 }
 
-# check if $swap_device exist and not if already enable as swap
+# check if devices exists and not if already enable as swap
 [ -e "${swap_device}" ] || exit 0
+[ -e "${full_device}" ] || exit 0
 
 # if the swap device is already activated, we stop there
 /sbin/swapon -s | grep -q "^$swap_device " && exit 0
 
+# We read the files for the configuration from the disk and not
+# the swap partition.
 # If a valid tar archive extracts with no error at offset 4k*128,
 # use it. Otherwise continue with swap creation logic.
-dd if=$swap_device bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null > /dev/null \
-    && setup_in_swap $swap_device
+dd if="${full_device}" bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null > /dev/null \
+    && setup_in_swap "${swap_device}" "${full_device}"
 
 if [ -x /sbin/blkid ]; then
     detect_blkid "$swap_device"
