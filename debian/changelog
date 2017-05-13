@@ -1,3 +1,10 @@
+gandi-hosting-vm2 (2.17) unstable; urgency=medium
+
+  * Fix on GPT swap device handling
+  * Fix on non SCSI virtual disk handling
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Sat, 13 May 2017 17:23:16 +0200
+
 gandi-hosting-vm2 (2.16) unstable; urgency=medium
 
   * Add a dependency on gdisk
