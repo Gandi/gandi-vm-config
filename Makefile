@@ -30,12 +30,15 @@ install:
 	install -m 0750 ./hooks/*			$(DESTDIR)/etc/gandi/hooks/
 	
 ifeq ($(OS),Linux)
+	# XXX this is obsolete and should be removed soon
 	mkdir -p $(DESTDIR)/etc/udev/rules.d
 	install -m 0640 ./udev/gandi.rules		$(DESTDIR)/etc/udev/rules.d/86-gandi.rules
-	install -d -m 0755 $(DESTDIR)/lib/udev
+	#
+	install -d -m 0755 $(DESTDIR)/lib/udev/rules.d
 	install -m 0755 ./udev/cpu_online.script	$(DESTDIR)/lib/udev/cpu_online
 	install -m 0755 ./udev/manage_memory.script	$(DESTDIR)/lib/udev/manage_memory
 	install -m 0755 ./udev/fake_blkid.script	$(DESTDIR)/lib/udev/fake_blkid
+	install -m 0640 ./udev/gandi.rules			$(DESTDIR)/lib/udev/rules.d/
 
 	# we copy the systemd files in the debian packages. If systemd is not
 	# installed, these files are useless
