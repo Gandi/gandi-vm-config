@@ -54,7 +54,7 @@ detect_getty() {
     fi
 }
 
-if [ -e /sys/bus/virtio/drivers/virtio_console ]; then
+if [ ! -d /proc/xen -a -e /sys/bus/virtio/drivers/virtio_console ]; then
     [ -e /dev/ttyS0 ] || mknod /dev/ttyS0 c 4 64
     ttydevlist='ttyS0'
 else
