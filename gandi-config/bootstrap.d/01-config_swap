@@ -25,7 +25,7 @@ elif [ ! -d /proc/xen ]; then
     swap_device=/dev/sdb
 fi
 
-[ ! -z "${full_device}" ] || full_device="${swap_device}"
+[ -e "${full_device}" ] || full_device="${swap_device}"
 
 # We load the default functions and configuration for gandi-config 
 [ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
@@ -174,7 +174,6 @@ setup_in_swap() {
 
 # check if devices exists and not if already enable as swap
 [ -e "${swap_device}" ] || exit 0
-[ -e "${full_device}" ] || exit 0
 
 # if the swap device is already activated, we stop there
 /sbin/swapon -s | grep -q "^$swap_device " && exit 0
