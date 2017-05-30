@@ -40,6 +40,9 @@ ifeq ($(OS),Linux)
 	install -m 0755 ./udev/fake_blkid.script	$(DESTDIR)/lib/udev/fake_blkid
 	install -m 0640 ./udev/gandi.rules			$(DESTDIR)/lib/udev/rules.d/
 
+	install -d -m 0755 $(DESTDIR)/etc/apt/trusted.gpg.d
+	install -m 0644 ./keys/gandi-archive.gpg	$(DESTDIR)/etc/apt/trusted.gpg.d/
+
 	# we copy the systemd files in the debian packages. If systemd is not
 	# installed, these files are useless
 	install -d -m 0755 $(DESTDIR)/usr/share/gandi/systemd
@@ -66,13 +69,18 @@ dist:   deb
 	mkdir debian/$(PKGNAME)-$(VERSION_MAJOR)
 	cp -rf debian/$(PKGNAME)/* debian/$(PKGNAME)-$(VERSION_MAJOR)/
 	mv -f debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/default \
-	    debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/sysconfig
-	cp debian/changelog debian/$(PKGNAME)-$(VERSION_MAJOR)/
-	
+		debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/sysconfig
+	install -m 0644 debian/changelog debian/$(PKGNAME)-$(VERSION_MAJOR)/
+	#
+	rm -rf debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/apt/trusted.gpg.d
+	install -d -m 0755 debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/pki/rpm-gpg/
+	install -m 0644 ./keys/RPM-GPG-KEY-Gandi \
+		debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/pki/rpm-gpg/
+	#
 	# create the tarball used during the rpm build process
 	gzip -9 debian/$(PKGNAME)-$(VERSION_MAJOR)/changelog
 	cd debian && tar cjf $(PKGNAME)-$(VERSION).tar.bz2 \
-	    $(PKGNAME)-$(VERSION_MAJOR)
+		$(PKGNAME)-$(VERSION_MAJOR)
 
 rpm:	dist
 	cp debian/$(PKGNAME)-$(VERSION).tar.bz2 ${RPMBUILDROOT}/SOURCES/
