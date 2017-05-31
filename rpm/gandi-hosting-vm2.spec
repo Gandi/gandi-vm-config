@@ -64,7 +64,7 @@ install -m 0644 %{sourcedir}/etc/sysconfig/gandi \
 mkdir -p $RPM_BUILD_ROOT/etc/udev/rules.d
 cp -raf %{sourcedir}/etc/udev/rules.d/	$RPM_BUILD_ROOT/etc/udev/
 
-mkdir -p $RPM_BUILD_ROOT/lib/udev
+mkdir -p $RPM_BUILD_ROOT/lib/udev/rules.d/
 cp -raf %{sourcedir}/lib/udev/ $RPM_BUILD_ROOT/lib/
 
 mkdir -p $RPM_BUILD_ROOT/etc/pki/rpm-gpg
@@ -233,6 +233,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(0644,root,root)
 %config(noreplace) /etc/sysconfig/gandi
 %config /etc/udev/rules.d/86-gandi.rules
+%config /lib/udev/rules.d/gandi.rules
 /etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi
 /etc/gandi/plugins-lib
 /etc/gandi/maintainer.gandi.key
