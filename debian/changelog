@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.19) unstable; urgency=medium
+
+  * Add new OPG key for public Gandi mirror
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 31 May 2017 09:59:07 +0200
+
 gandi-hosting-vm2 (2.18) unstable; urgency=medium
 
   * console: never use ttyS0 when using Xen
