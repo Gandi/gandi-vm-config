@@ -82,7 +82,10 @@ dist:   deb
 	cd debian && tar cjf $(PKGNAME)-$(VERSION).tar.bz2 \
 		$(PKGNAME)-$(VERSION_MAJOR)
 
-rpm:	dist
+rpm:	dist rpm_prepare
+	rpmbuild -bb rpm/SPECS/$(PKGNAME).spec
+
+rpm_prepare:
 	cp debian/$(PKGNAME)-$(VERSION).tar.bz2 ${RPMBUILDROOT}/SOURCES/
 	
 	# prepare the spec file for the build of the current version 
@@ -92,8 +95,6 @@ rpm:	dist
 	
 	install -m 0750 rpm/postinst-fix-mandriva.sh \
 	    $(RPMBUILDROOT)/SOURCES/postinst-fix-mandriva.sh
-		
-	rpmbuild -bb rpm/SPECS/$(PKGNAME).spec
 
 complete-clean: clean
 	for ext in deb changes tar.gz; do \
@@ -107,3 +108,5 @@ clean:
 	@rm -rf debian/$(PKGNAME)-1*
 	@rm -rf debian/$(PKGNAME).tar
 	@dh_clean
+
+sinclude Makefile.specific
