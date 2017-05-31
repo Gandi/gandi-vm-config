@@ -175,6 +175,8 @@ else
     fi
 fi
 
+sed -i -e 's,^gpgcheck=0,gpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi,g' /etc/yum.repos.d/Gandi-Base.repo
+
 # remove old and obsolete plugins
 rm -f /etc/gandi/plugins.d/04-config_network
 rm -f /etc/gandi/plugins.d/06-vm-fix-cron
