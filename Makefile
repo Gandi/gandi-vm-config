@@ -49,6 +49,8 @@ ifeq ($(OS),Linux)
 	for elt in ./systemd/system/*.service; do \
 	    install -m 0644 $$elt $(DESTDIR)/usr/share/gandi/systemd/; \
 	done
+
+	install -m 0750 kvm_to_xen_migration.sh $(DESTDIR)/usr/share/gandi/
 endif
 	
 	install -d -m 0755 $(DESTDIR)/etc/default
