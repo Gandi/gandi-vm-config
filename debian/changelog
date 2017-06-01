@@ -1,3 +1,11 @@
+gandi-hosting-vm2 (2.20) unstable; urgency=medium
+
+  * Add script to migrate from KVM to Xen
+  * Prepare the migration of udev rules in rpm
+  * Update Makefile for rpm build
+
+ -- Vincent Legout <vincent.legout@gandi.net>  Thu, 01 Jun 2017 09:58:09 +0200
+
 gandi-hosting-vm2 (2.19) unstable; urgency=medium
 
   * Add new OPG key for public Gandi mirror
