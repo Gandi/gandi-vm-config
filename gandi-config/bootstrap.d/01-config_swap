@@ -67,13 +67,20 @@ enable_swap() {
 
 # params: $1 is swap device
 detect_blkid() {
-    # Detection of GPT disk
+    ## Detection of GPT disk
+    # cannot use the ensure_safe method as the GPT UUID
+    # change at each boot, therefor the MD5 sum changes
     info=$(/sbin/blkid -s PARTLABEL -o value "$1")
     if [ ! -z "${info}" -a 'gandiswap' = "${info}" ]; then
-        if ensure_safe "$1"; then
-            create_swap "$1"
-            enable_swap "$1"
-        fi
+        create_swap "$1"
+        enable_swap "$1"
+        return 0
+    fi
+
+    info=$(/sbin/blkid -s PTTYPE -o value "$1")
+    if [ ! -z "${info}" -a 'gpt' = "${info}" ]; then
+        create_swap "$1"
+        enable_swap "$1"
         return 0
     fi
 
@@ -182,8 +189,13 @@ setup_in_swap() {
 # the swap partition.
 # If a valid tar archive extracts with no error at offset 4k*128,
 # use it. Otherwise continue with swap creation logic.
-dd if="${full_device}" bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null > /dev/null \
-    && setup_in_swap "${swap_device}" "${full_device}"
+if dd if="${full_device}" bs=4k skip=128 2> /dev/null | tar t gandi 2> /dev/null > /dev/null; then
+    setup_in_swap "${swap_device}" "${full_device}"
+else
+    msg='Cannot find tarball and info in the swap space. Continue formatting.'
+    echo "$msg" | logger -t gandi
+    echo "$msg"
+fi
 
 if [ -x /sbin/blkid ]; then
     detect_blkid "$swap_device"
