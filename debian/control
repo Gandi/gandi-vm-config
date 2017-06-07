@@ -15,8 +15,8 @@ Depends: openssl,
  module-init-tools | kmod,
  python,
  acpid,
- acpi-support-base | acpi-support,
- gdisk
+ acpi-support-base | acpi-support
+Recommends: gdisk
 Conflicts: gandi-hosting-agent, 
  gandi-hosting-agent-schemes,
  gandi-hosting-agent-plugins-internal-debian, 
@@ -36,3 +36,6 @@ Description: scripts for virtual machine on Gandi IaaS
   - gandi-mount  : if virtual disk is not detected and already
   mounted, this service start a udev call to re-attach all 
   available unmounted virtual disks.
+ .
+ In case of GPT partition on disk, you should install gdisk to
+ handle the partitions.

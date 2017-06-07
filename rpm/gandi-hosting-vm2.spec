@@ -5,7 +5,7 @@
 %define name    gandi-hosting-vm2
 %define version 1.2
 %define release 1
-%define sourcedir	%{_topdir}/BUILD/%{name}-%{version}
+%define sourcedir    %{_topdir}/BUILD/%{name}-%{version}
 
 Name:           %{name} 
 Summary:        Script for GANDI hosting virtual machine.
@@ -13,16 +13,28 @@ Version:        %{version}
 Release:        %{release} 
 Source0:        %{name}-%{version}.tar.bz2
 URL:            http://www.gandi.net/hosting/ 
-License:	Gandi License
-BuildArch: 	noarch
+License:        Gandi License
+BuildArch:      noarch
 Group:          System/Configuration 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot 
-Requires:	openssl, udev, acpid, gdisk
+Requires:       openssl, udev, acpid, sed
 Provides:       gandi-hosting-vm, gandi-hosting-agent
 Obsoletes:      gandi-hosting-vm <= 1.1 , gandi-hosting-agent <= 1.1
 
 %description
-Script and configuration for GANDI Hosting virtual machine.
+Collection of script to handle dynamic resources of virtual
+machine on Gandi IaaS hosting solution. most configuration
+is done during the first and subsequent boot.
+
+services:
+ - gandi-postboot: execute customer scrip to setup the virtual machine.
+ - gandi-config: configure the system during boot
+ - gandi-mount  : if virtual disk is not detected and already mounted,
+   this service start a udev call to re-attach all available unmounted
+   virtual disks.
+
+In case of GPT partition on disk, you should install gdisk to
+handle the partitions.
 
 %prep 
 %setup -q
@@ -81,7 +93,7 @@ if [ "$1" -eq 0 ]; then
         if [ -e $SYSTEMD ]; then
             rm -f "/etc/systemd/system/default.target.wants/gandi-$elt"
             rm -f "/lib/systemd/system/gandi-$elt"
-        fi 
+        fi
 
         if [ -x /sbin/chkconfig ]; then
             /sbin/chkconfig "gandi-$elt" off || \
@@ -109,7 +121,7 @@ find /etc/rc* -type l -iname "*gandi-kernel*" -delete
 
 # Runlevel S is only for single, fallback to rc2 rc3 rc5 
 if [ -e /etc/SuSE-release ] || [ -e /etc/centos-release ]; then
-    for elt in config mount postboot bootstrap; do 
+    for elt in config mount postboot bootstrap; do
         tempfile=$(mktemp --suffix gnd)
         sed -e 's/^# Default-Start:.*S/# Default-Start:\t2 3 5/g' \
             /etc/init.d/gandi-$elt > "$tempfile"
@@ -154,7 +166,7 @@ if [ -e $SYSTEMD ]; then
         rm -f "/etc/systemd/system/default.target.wants/gandi-${elt}.service" \
             || true
         srcfile="/usr/share/gandi/systemd/gandi-${elt}.service"
-        if [ -e "$srcfile" ]; then 
+        if [ -e "$srcfile" ]; then
             ln -sf "$srcfile" /lib/systemd/system/ || true
             ln -sf "$srcfile" /usr/lib/systemd/system/ || true
             ln -sf "/lib/systemd/system/gandi-${elt}.service" \
