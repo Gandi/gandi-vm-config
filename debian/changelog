@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.21) unstable; urgency=medium
+
+  * Gdisk tools as recommends: only used for GPT disks
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 07 Jun 2017 14:32:01 +0200
+
 gandi-hosting-vm2 (2.20) unstable; urgency=medium
 
   * Add script to migrate from KVM to Xen
