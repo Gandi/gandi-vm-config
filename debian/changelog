@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.23) unstable; urgency=medium
+
+  * Remove some errors during the boot of a VM
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 19 Jun 2017 16:23:19 +0200
+
 gandi-hosting-vm2 (2.22) unstable; urgency=medium
 
   * Handle better the Linux formatting of swap space in case 
