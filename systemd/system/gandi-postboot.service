@@ -11,6 +11,7 @@ After=gandi-config.service network-online.target
 Type=oneshot
 ExecStart=/etc/init.d/gandi-postboot start
 RemainAfterExit=yes
+# Deprecated flag, should be removed for systemd 232 or newer
 SysVStartPriority=99
 
 [Install]
