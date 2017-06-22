@@ -5,7 +5,7 @@ case "$1" in
     configure|upgrade)
 
        # We create ssh host key if not present.
-       if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
+       if [ -z "$(find /etc/ssh/ -name 'ssh_host_*_key' -print -quit)" ]; then
            dpkg-reconfigure openssh-server
        fi
     
