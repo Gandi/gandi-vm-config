@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.24) unstable; urgency=medium
+
+  * Remove the old signing key for Gandi repository
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Thu, 22 Jun 2017 14:19:44 +0200
+
 gandi-hosting-vm2 (2.23) unstable; urgency=medium
 
   * Remove some errors during the boot of a VM
