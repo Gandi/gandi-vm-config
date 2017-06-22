@@ -4,14 +4,10 @@
 case "$1" in
     configure|upgrade)
 
-	# We add Gandi maintainer key to ease package installation
-	[ -f /etc/gandi/maintainer.gandi.key ] && \
-            apt-key add /etc/gandi/maintainer.gandi.key > /dev/null
-
-    	# We create ssh host key if not present.
- 	if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
-		dpkg-reconfigure openssh-server
-	fi
+       # We create ssh host key if not present.
+       if [ ! -e /etc/ssh/ssh_host_dsa_key ]; then
+           dpkg-reconfigure openssh-server
+       fi
     
         # cleaning files from old installation
         [ -d /etc/gandi/plugins-available ] && \
@@ -37,10 +33,10 @@ case "$1" in
             done
 
             if [ -d /etc/systemd/system/multi-user.target.wants ]; then
-		syswant=/etc/systemd/system/multi-user.target.wants
-	    else
-		syswant=/etc/systemd/system/default.target.wants
-	    fi
+                syswant=/etc/systemd/system/multi-user.target.wants
+            else
+                syswant=/etc/systemd/system/default.target.wants
+            fi
 
             for elt in mount config postboot bootstrap; do 
                 rm -f "/lib/systemd/system/gandi-${elt}.service" || true
@@ -58,11 +54,11 @@ case "$1" in
         #
         # config service
         #
-	if [ -L /etc/rc2.d/S20gandi-config ]; then
+        if [ -L /etc/rc2.d/S20gandi-config ]; then
             update-rc.d -f gandi-config remove | \
                 grep -q "Removing any system startup" || true
         fi
-	if [ ! -L /etc/rc2.d/S12gandi-config ] || \
+        if [ ! -L /etc/rc2.d/S12gandi-config ] || \
             [ ! -L /etc/rc2.d/S10gandi-config ] ; then
             update-rc.d gandi-config start 10 2 3 4 5 . 2>&1 | \
                 egrep -v "warning:.*match LSB" | \
@@ -161,7 +157,7 @@ case "$1" in
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
-		# nothing
+        # nothing
     ;;
 
     *)

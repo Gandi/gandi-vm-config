@@ -248,7 +248,6 @@ rm -rf $RPM_BUILD_ROOT
 %config /lib/udev/rules.d/gandi.rules
 /etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi
 /etc/gandi/plugins-lib
-/etc/gandi/maintainer.gandi.key
 /etc/gandi/sysctl.conf
 /usr/share/gandi/systemd/gandi-config.service
 /usr/share/gandi/systemd/gandi-mount.service

@@ -20,7 +20,6 @@ install:
 	install -m 0750 ./manage_iface.sh		$(DESTDIR)/etc/gandi/
 	install -d -m 0750 $(DESTDIR)/etc/gandi/plugins.d
 	install -m 0750 ./gandi-config/plugins.d/*	$(DESTDIR)/etc/gandi/plugins.d/
-	install -m 0640 ./maintainer.gandi.key		$(DESTDIR)/etc/gandi/
 	install -m 0640 ./sysctl.conf			$(DESTDIR)/etc/gandi/
 	install -m 0640 ./gandi-config/plugins-lib	$(DESTDIR)/etc/gandi/
 	install -d -m 0750 $(DESTDIR)/usr/share/gandi/bootstrap.d
