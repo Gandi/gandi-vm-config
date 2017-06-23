@@ -33,11 +33,12 @@ ifeq ($(OS),Linux)
 	mkdir -p $(DESTDIR)/etc/udev/rules.d
 	install -m 0640 ./udev/gandi.rules		$(DESTDIR)/etc/udev/rules.d/86-gandi.rules
 	#
+	#install -m 0640 ./udev/gandi.rules			$(DESTDIR)/lib/udev/rules.d/86-gandi.rules
+	#
 	install -d -m 0755 $(DESTDIR)/lib/udev/rules.d
 	install -m 0755 ./udev/cpu_online.script	$(DESTDIR)/lib/udev/cpu_online
 	install -m 0755 ./udev/manage_memory.script	$(DESTDIR)/lib/udev/manage_memory
 	install -m 0755 ./udev/fake_blkid.script	$(DESTDIR)/lib/udev/fake_blkid
-	install -m 0640 ./udev/gandi.rules			$(DESTDIR)/lib/udev/rules.d/
 
 	install -d -m 0755 $(DESTDIR)/etc/apt/trusted.gpg.d
 	install -m 0644 ./keys/gandi-archive.gpg	$(DESTDIR)/etc/apt/trusted.gpg.d/
@@ -50,6 +51,10 @@ ifeq ($(OS),Linux)
 	done
 
 	install -m 0750 kvm_to_xen_migration.sh $(DESTDIR)/usr/share/gandi/
+
+	install -d -m 0750 $(DESTDIR)/etc/auto.master.d
+	install -m 0640 autofs/auto.master.d/gandi.autofs $(DESTDIR)/etc/auto.master.d/
+	install -m 0750 autofs/auto.gandi $(DESTDIR)/etc/
 endif
 	
 	install -d -m 0755 $(DESTDIR)/etc/default
@@ -93,9 +98,6 @@ rpm_prepare:
 	sed -e "s/\(%changelog\)/\1\n* $(shell date +"%a %b %d %Y") Gandi Maintainer <noc@gandi.net> $(VERSION)gnd\n- Bug fixing for packaging and scripts. See \/usr\/share\/doc\/$(PKGNAME)\/changelog.gz.\n/" \
 	  -e "s/^\(%define version \).*/\1$(VERSION_MAJOR)/" \
 	  rpm/$(PKGNAME).spec > $(RPMBUILDROOT)/SPECS/$(PKGNAME).spec
-	
-	install -m 0750 rpm/postinst-fix-mandriva.sh \
-	    $(RPMBUILDROOT)/SOURCES/postinst-fix-mandriva.sh
 
 complete-clean: clean
 	for ext in deb changes tar.gz; do \
