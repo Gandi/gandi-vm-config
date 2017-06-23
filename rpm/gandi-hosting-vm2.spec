@@ -49,8 +49,6 @@ mkdir -p $RPM_BUILD_ROOT/etc/gandi
 cp -raf %{sourcedir}/etc/gandi	$RPM_BUILD_ROOT/etc/
 
 install -d -m 0755 $RPM_BUILD_ROOT/usr/share/gandi
-install -m 0755 %{_topdir}/SOURCES/postinst-fix-mandriva.sh \
-    $RPM_BUILD_ROOT/usr/share/gandi/fix-mandriva.sh
 cp -raf %{sourcedir}/usr/share/gandi/systemd \
     $RPM_BUILD_ROOT/usr/share/gandi/
 cp -raf %{sourcedir}/usr/share/gandi/bootstrap.d \
@@ -82,6 +80,10 @@ cp -raf %{sourcedir}/lib/udev/ $RPM_BUILD_ROOT/lib/
 mkdir -p $RPM_BUILD_ROOT/etc/pki/rpm-gpg
 cp -af %{sourcedir}/etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi $RPM_BUILD_ROOT/etc/pki/rpm-gpg/
 
+#mkdir -p $RPM_BUILD_ROOT/etc/auto.master.d
+#cp -af %{sourcedir}/etc/auto.master.d/gandi.autofs $RPM_BUILD_ROOT/etc/auto.master.d/
+#cp -af %{sourcedir}/etc/auto.gandi $RPM_BUILD_ROOT/etc
+
 %preun
 #
 # --- %preun ---
@@ -112,9 +114,6 @@ fi
 #
 # --- %posttrans ---
 #
-
-# Distribution specific fixes for chkconfig of low level initscript
-/usr/share/gandi/fix-mandriva.sh
 
 # cleaning old service
 find /etc/rc* -type l -iname "*gandi-kernel*" -delete
@@ -189,6 +188,10 @@ fi
 
 sed -i -e 's,^gpgcheck=0,gpgcheck=1\ngpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi,g' /etc/yum.repos.d/Gandi-Base.repo
 
+if [ -f /lib/udev/rules.d/gandi.rules ]; then
+    mv /lib/udev/rules.d/gandi.rules /lib/udev/rules.d/gandi.disabled
+fi
+
 # remove old and obsolete plugins
 rm -f /etc/gandi/plugins.d/04-config_network
 rm -f /etc/gandi/plugins.d/06-vm-fix-cron
@@ -208,7 +211,6 @@ rm -f /etc/gandi/dhclient-exit-hooks
 rm -f /etc/gandi/dhcp-postconf
 rm -f /etc/gandi/dhcp-hostname
 rm -f /etc/gandi/dhcp-hostname-static-net
-rm -f /etc/gandi/fix-mandriva.sh
 rm -rf /etc/gandi/bootstrap.d
 
 # obsolete plugins in gandi-hosting-vm2 version
@@ -236,16 +238,16 @@ rm -rf $RPM_BUILD_ROOT
 /etc/gandi/manage_data_disk.sh
 /etc/gandi/manage_iface.sh
 /usr/share/gandi/bootstrap.d
-/usr/share/gandi/fix-mandriva.sh
 /lib/udev/cpu_online
 /lib/udev/manage_memory
 /lib/udev/fake_blkid
 /usr/share/gandi/get_json.py
+#/etc/auto.gandi
 %config(noreplace) /etc/gandi/hooks/*
 %defattr(0644,root,root)
 %config(noreplace) /etc/sysconfig/gandi
 %config /etc/udev/rules.d/86-gandi.rules
-%config /lib/udev/rules.d/gandi.rules
+#%config /lib/udev/rules.d/gandi.rules
 /etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi
 /etc/gandi/plugins-lib
 /etc/gandi/sysctl.conf
@@ -256,4 +258,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog 
 * Fri Sep 19 2008 Nicolas Chipaux <aegiap@gandi.net> 1.0.0-1474-1gnd
-- Bug fixing for packaging and scripts.
+- Bug fixing for packaging and scripts

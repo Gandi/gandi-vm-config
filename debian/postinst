@@ -127,6 +127,26 @@ case "$1" in
             egrep -v "warning:.*match LSB" | \
             grep -q "Adding system startup" || true 
 
+        # Debian stretch
+        ret=$(expr match "$debversion" '^9.')
+        if [ $ret -ge 2 ]; then
+            # we switch the virtual disk management to autofs/automount and
+            # we need to disable the udev rules with the python script
+            for f_ in /lib/udev/rules.d/gandi.disabled \
+                      /lib/udev/rules.d/gandi.rules \
+                      /etc/udev/rules.d/86-gandi.rules; do
+                sed -i -e "s/^\(.*manage_data_disk.*\)$/#disabled# \1/g" "${f_}"
+            done
+            udevadm control --reload
+        fi
+
+        if [ -f /lib/udev/rules.d/gandi.rules ]; then
+            # Avoid two files with the same set of udev rules.
+            # We need a proper migration.
+            mv -f /lib/udev/rules.d/gandi.rules /lib/udev/rules.d/gandi.disabled
+            udevadm control --reload
+        fi
+
         # obsolete and old plugins 
         rm -f /etc/gandi/plugins.d/04-config_network
         rm -f /etc/gandi/plugins.d/06-vm-fix-cron
