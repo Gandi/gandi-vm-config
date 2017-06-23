@@ -1,0 +1,1 @@
+/srv   /etc/auto.gandi --timeout=2592000,sync,nodev,nosuid,noatime

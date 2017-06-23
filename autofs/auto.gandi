@@ -1,0 +1,31 @@
+#!/bin/sh
+
+key="${1}"
+
+if [ -d /proc/xen ]; then
+	exclude_disk="^xvd[az]"
+else
+	exclude_disk="^sd[a-z]"
+fi
+
+# list of additional disk
+disks=$(grep -o xvd[a-z1-9]* /proc/partitions | egrep -v "${exclude_disk}" | xargs)
+
+# looking in all the available disk
+for disk in $disks; do
+	device="/dev/${disk}"
+	label=$(/sbin/blkid -o value -s LABEL "${device}")
+
+	# if we found the key is the label or the name of the disk, we check 
+	# if the disk is mounted. If not, we mount it.
+	if [ "${key}" = "${label}" ]; then
+		if ! grep -q "${device}" /proc/mounts; then
+			echo "-fstype=auto,rw :${device}"
+			exit 0
+		else
+			exit 1
+		fi
+	fi
+done
+
+exit 1
