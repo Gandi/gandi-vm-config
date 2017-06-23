@@ -27,6 +27,9 @@ CONFIG_ALLOW_MOUNT=1
 CONFIG_CRON=1
 
 # use these parameters when mounting additional disk
+# This variable is not used by the autofs setup to automaticaly
+# mount the extra disk. It is only used by the python script
+# called by udev
 CONFIG_MOUNT_PARAMS="rw,nosuid,nodev,noatime"
 
 # mount the additional disk in this directory
