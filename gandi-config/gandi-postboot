@@ -30,7 +30,11 @@
 
 case "$1" in
     start|restart|reload)
-	if [ -x /gandi/init ]; then
+        export `grep ^CONFIG_ALLOW_MOUNT /etc/default/gandi`
+        if [ 0 -eq ${CONFIG_ALLOW_MOUNT} ] && [ -f /etc/default/autofs ]; then
+            service autofs stop
+        fi
+        if [ -x /gandi/init ]; then
             pbin=/usr/bin/python2
             [ -x $pbin ] || pbin=/usr/bin/python
             $pbin /gandi/init --postboot
@@ -38,10 +42,10 @@ case "$1" in
         fi
     ;;
     stop|force-reload|status)
-	# nothing
+        # nothing
     ;;
     *)
-	echo "Script only started at boot for system configuration."
+        echo "Script only started at boot for system configuration."
     ;;
 esac
 
