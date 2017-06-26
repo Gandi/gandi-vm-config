@@ -1,3 +1,10 @@
+gandi-hosting-vm2 (2.25) unstable; urgency=medium
+
+  * Start to use autofs to handle virtual disk
+  * Remove specifics for Mandriva system
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 26 Jun 2017 10:41:58 +0200
+
 gandi-hosting-vm2 (2.24) unstable; urgency=medium
 
   * Remove the old signing key for Gandi repository
