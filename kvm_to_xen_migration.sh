@@ -4,53 +4,32 @@
 # console such that the VM can reboot on Xen without any other update
 # needed.
 
+set -eu
+
 console=hvc0
-error=1
+
+install_package_rpm () {
+    if ! rpm -q $1 >/dev/null ; then
+        yum install -y $1
+    fi
+}
+
+install_package_deb () {
+    if ! dpkg-query -W $1 >/dev/null ; then
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -q $1
+    fi
+}
+
 
 if which lsb_release >/dev/null; then
-    release=$(lsb_release -r -s)
-    id=$(lsb_release -i -s)
-    codename=$(lsb_release -c -s)
-    error=0
+    id=$(lsb_release -i -s | tr '[A-Z]' '[a-z]')
 elif [ -f /etc/os-release ]; then
-    id=$(grep "^ID=" /etc/os-release | cut -c 4-)
-    version_id=$(grep "^VERSION_ID=" /etc/os-release | cut -c 13- | cut -c -1)
-    if [ "8" = "${version_id}" ] && [ "debian" = ${id} ]; then
-        release="8"
-        codename="jessie"
-        error=0
-    elif [ \"centos\" = "${id}" ]; then
-        release="7"
-        codename="centos"
-        id=centos
-        error=0
-    fi
-fi
-
-if [ 1 = ${error} ]; then
-    echo "we cannot detect your operating system, and thus cannot configure"
-    echo "your system properly. Please open a support ticket with your"
+    id=$(grep "^ID=" /etc/os-release | cut -c 4- | tr -d '"')
+else
+    echo "We cannot detect your operating system, and thus cannot"
+    echo "configure it properly. Please open a support ticket with your"
     echo "configuration and they will help you upgrading your system."
     exit 1
-fi
-
-if [ "14.04" = "${release}" ]; then
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y -q linux-image-generic grub2-common
-
-    if [ -f /etc/init/ttyS0.conf ]; then
-        sed -i "s/ttyS0/${console}/" /etc/init/ttyS0.conf
-        mv -f /etc/init/ttyS0.conf "/etc/init/${console}.conf"
-    fi
-elif [ "Debian" = "${id}" ] || [ "debian" = "${id}" ]; then
-    apt-get update
-    DEBIAN_FRONTEND=noninteractive apt-get install -y linux-image-amd64 grub-efi
-
-    if [ -f /etc/inittab ]; then
-        if grep ttyS0 /etc/inittab >/dev/null; then
-            sed -i "s/ttyS0/${console}/" /etc/inittab
-        fi
-    fi
 fi
 
 if [ "centos" = "${id}" ]; then
@@ -66,38 +45,96 @@ GRUB_CMDLINE_LINUX=""
 GRUB_GFXPAYLOAD_LINUX=text
 GRUB_TERMINAL=console
 EOF
-    else
-        echo "we detected grub on your system, and thus we cannot configure"
-        echo "your system properly. Please open a support ticket with your"
-        echo "configuration and they will help you upgrading your system."
-        exit 1
     fi
 
-    yum install -y kernel
-    yum install -y grub2-efi grub2-tools
+    install_package_rpm 'kernel'
+    install_package_rpm 'grub2-tools'
+    install_package_rpm 'grub2-efi'
 
     sed -i 's/#add_drivers+=""/add_drivers+="xen-blkfront xen-netfront"/' /etc/dracut.conf
 
-    grub2-mkconfig -o /boot/grub/grub.cfg
+elif [ "ubuntu" = "${id}" ]; then
 
-    kernel=$(rpm -q --qf %{PROVIDEVERSION} kernel)
-    mkinitrd --force /boot/initramfs-${kernel}.x86_64.img ${kernel}.x86_64
+    apt-get update
+    install_package_deb 'grub2-common'
+    install_package_deb 'linux-image-generic'
+
+elif [ "debian" = "${id}" ]; then
+
+    apt-get update
+    install_package_deb 'grub-efi'
+    install_package_deb 'linux-image-amd64'
 
 else
-
-    if [ "16.04" = "${release}" ]; then
-        sed -i "s/ttyS0/${console}/" /etc/default/grub
-        sed -i 's,GRUB_CMDLINE_LINUX=",GRUB_CMDLINE_LINUX="nomce root=/dev/xvda1 ,' /etc/default/grub
-    else
-        sed -i 's,GRUB_CMDLINE_LINUX=",GRUB_CMDLINE_LINUX="nomce root=/dev/xvda1 console=hvc0 ,' /etc/default/grub
-    fi
-
-    update-grub2
+    echo "We do not support you operating system. Please open a"
+    echo "support ticket with your configuration and they will help"
+    echo "you upgrading your system."
+    exit 1
 fi
 
-f_='/etc/securetty'
-if [ -f "${f_}" ]; then
-    if ! grep "${console}" "${f_}" > /dev/null; then
-        echo "${console}" >> "${f_}"
+if [ -f /etc/default/grub ]; then
+
+    if ! grep -q '^GRUB_CMDLINE_LINUX=' /etc/default/grub; then
+        echo "We cannot read your grub configuration. Please open a"
+        echo "support ticket with your configuration and they will"
+        echo "help you upgrading your system."
+        exit 1
+    fi
+
+    # fix console
+    if ! grep -q console=${console} /etc/default/grub; then
+        if grep -q console=ttyS0 /etc/default/grub; then
+            sed -i "s/ttyS0/${console}/" /etc/default/grub
+        else
+            sed -i 's,^GRUB_CMDLINE_LINUX="\(.*\)",GRUB_CMDLINE_LINUX="\1 console=hvc0",' /etc/default/grub
+        fi
+    fi
+
+    # add nomce
+    if ! grep -q nomce /etc/default/grub; then
+        sed -i 's,^GRUB_CMDLINE_LINUX="\(.*\)",GRUB_CMDLINE_LINUX="\1 nomce",' /etc/default/grub
+    fi
+
+    # fix root
+    if ! grep root=/dev/xvda1 /etc/default/grub | grep -q "^GRUB_CMDLINE"; then
+        if grep root= /etc/default/grub | grep -q "^GRUB_CMDLINE"; then
+            sed -i 's,root=\([a-zA-Z0-9/]*\),root=/dev/xvda1,' /etc/default/grub
+        else
+            sed -i 's,^GRUB_CMDLINE_LINUX="\(.*\)",GRUB_CMDLINE_LINUX="\1 root=/dev/xvda1",' /etc/default/grub
+        fi
+    fi
+
+    if [ "centos" = "${id}" ]; then
+
+        grub2-mkconfig -o /boot/grub/grub.cfg
+
+        kernel=$(rpm -q --qf %{PROVIDEVERSION} kernel)
+        mkinitrd --force /boot/initramfs-${kernel}.x86_64.img ${kernel}.x86_64
+    else
+        update-grub2
+    fi
+
+else
+    echo "we could not detect grub on your system, and thus we cannot"
+    echo "configure your system properly. Please open a support"
+    echo "ticket with your configuration and they will help you"
+    echo "upgrading your system."
+    exit 1
+fi
+
+if [ -f /etc/inittab ]; then
+    if grep -q ttyS0 /etc/inittab; then
+        sed -i "s/ttyS0/${console}/" /etc/inittab
+    fi
+fi
+
+if [ -f /etc/init/ttyS0.conf ]; then
+    sed -i "s/ttyS0/${console}/" /etc/init/ttyS0.conf
+    mv -f /etc/init/ttyS0.conf "/etc/init/${console}.conf"
+fi
+
+if [ -f /etc/securetty ]; then
+    if ! grep -q "${console}" /etc/securetty; then
+        echo "${console}" >> /etc/securetty
     fi
 fi
