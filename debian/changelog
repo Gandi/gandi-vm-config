@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.26) unstable; urgency=medium
+
+  * Improve migration from Qemu/KVM to Xen
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 10 Jul 2017 18:34:29 +0200
+
 gandi-hosting-vm2 (2.25) unstable; urgency=medium
 
   * Start to use autofs to handle virtual disk
