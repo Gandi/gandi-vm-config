@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.27) unstable; urgency=medium
+
+  * Include Qemu/KVM to Xen migration script in rpm file
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 11 Jul 2017 18:40:13 +0200
+
 gandi-hosting-vm2 (2.26) unstable; urgency=medium
 
   * Improve migration from Qemu/KVM to Xen
