@@ -56,6 +56,8 @@ cp -raf %{sourcedir}/usr/share/gandi/bootstrap.d \
 
 install -m 0750 %{sourcedir}/usr/share/gandi/get_json.py \
     $RPM_BUILD_ROOT/usr/share/gandi/
+install -m 0750 %{sourcedir}/usr/share/gandi/kvm_to_xen_migration.sh \
+    $RPM_BUILD_ROOT/usr/share/gandi/
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 install -m 0755 %{sourcedir}/etc/init.d/gandi-config \
@@ -242,6 +244,7 @@ rm -rf $RPM_BUILD_ROOT
 /lib/udev/manage_memory
 /lib/udev/fake_blkid
 /usr/share/gandi/get_json.py
+/usr/share/gandi/kvm_to_xen_migration.sh
 #/etc/auto.gandi
 %config(noreplace) /etc/gandi/hooks/*
 %defattr(0644,root,root)
