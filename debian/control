@@ -16,7 +16,8 @@ Depends: openssl,
  python,
  acpid,
  acpi-support-base | acpi-support
-Recommends: gdisk, autofs
+Recommends: gdisk
+Suggests: autofs
 Conflicts: gandi-hosting-agent, 
  gandi-hosting-agent-schemes,
  gandi-hosting-agent-plugins-internal-debian, 
