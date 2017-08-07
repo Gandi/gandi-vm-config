@@ -1,13 +1,58 @@
 #!/bin/sh
 # postinst script for gandi-hosting-vm2
 
+# we switch the virtual disk management to autofs/automount and
+# we need to disable the udev rules with the python script
+disable_udev_disk_rules() {
+	for f_ in /lib/udev/rules.d/gandi.disabled \
+			  /lib/udev/rules.d/gandi.rules \
+			  /etc/udev/rules.d/86-gandi.rules; do
+		if [ -e "${f_}" ]; then
+			if ! grep -q '^#disabled#.*manage_data_disk.py' "${f_}"; then
+				sed -i -e "s/^\(.*manage_data_disk.py.*\)$/#disabled# \1/g" "${f_}" > /dev/null 2>&1
+			fi
+		fi
+	done
+	udevadm control --reload
+}
+
+disable_autofs_gandi() {
+	f_='/etc/auto.master.d/gandi.autofs'
+	[ -e "${f_}" ] || return 1
+	sed -i -e 's,^/srv[\s\t ]*/etc/auto.gandi,#/srv\t/etc/auto.gandi,g' "${f_}" > /dev/null 2>&1
+	return $?
+}
+
+autofs_installed() {
+	dpkg-query -s autofs > /dev/null 2>&1
+	return $?
+}
+
+udev_handle_disk() {
+	for f_ in /lib/udev/rules.d/gandi.disabled \
+			  /lib/udev/rules.d/gandi.rules \
+			  /etc/udev/rules.d/86-gandi.rules; do
+		if [ -e "${f_}" ]; then
+			egrep -q '^[^#].*manage_data_disk.py' ${f_} > /dev/null 2>&1
+			[ $? -eq 0 ] && return 0
+		fi
+	done
+	return 1
+}
+
+autofs_handle_srv() {
+	list_files=`ls -1 /etc/auto.master /etc/auto.master.d/*.autofs | grep -v gandi.autofs | xargs`
+	grep -q ^/srv ${list_files} > /dev/null 2>&1
+	return $?
+}
+
 case "$1" in
     configure|upgrade)
 
-       # We create ssh host key if not present.
-       if [ -z "$(find /etc/ssh/ -name 'ssh_host_*_key' -print -quit)" ]; then
-           dpkg-reconfigure openssh-server
-       fi
+		# We create ssh host key if not present.
+		if [ -z "$(find /etc/ssh/ -name 'ssh_host_*_key' -print -quit)" ]; then
+			LC_ALL=C LANG=C /usr/sbin/dpkg-reconfigure openssh-server -f noninteractive -p critical
+		fi
     
         # cleaning files from old installation
         [ -d /etc/gandi/plugins-available ] && \
@@ -51,9 +96,7 @@ case "$1" in
             done 
         fi
 
-        #
         # config service
-        #
         if [ -L /etc/rc2.d/S20gandi-config ]; then
             update-rc.d -f gandi-config remove | \
                 grep -q "Removing any system startup" || true
@@ -65,16 +108,12 @@ case "$1" in
                 grep -q "Adding system startup" || true
         fi
 
-        #
         # older kernel service
-        #
         if [ -L /etc/rc2.d/S11gandi-kernel ]; then
             rm -f /etc/rc2.d/S11gandi-kernel
         fi
 
-        #
         # postboot service
-        #
         update-rc.d gandi-postboot start 99 2 3 4 5 . 2>&1 | \
             egrep -v "warning:.*match LSB" | \
             grep -q "Adding system startup" || true
@@ -127,25 +166,35 @@ case "$1" in
             egrep -v "warning:.*match LSB" | \
             grep -q "Adding system startup" || true 
 
-        # Debian stretch
-        ret=$(expr match "$debversion" '^9.')
-        if [ $ret -ge 2 ]; then
-            # we switch the virtual disk management to autofs/automount and
-            # we need to disable the udev rules with the python script
-            for f_ in /lib/udev/rules.d/gandi.disabled \
-                      /lib/udev/rules.d/gandi.rules \
-                      /etc/udev/rules.d/86-gandi.rules; do
-                sed -i -e "s/^\(.*manage_data_disk.*\)$/#disabled# \1/g" "${f_}"
-            done
-            udevadm control --reload
-        fi
+		# Debian stretch
+		ret=$(expr match "$debversion" '^9.')
+		if [ $ret -ge 2 ]; then
+			disable_udev_disk_rules
+		fi
 
-        if [ -f /lib/udev/rules.d/gandi.rules ]; then
-            # Avoid two files with the same set of udev rules.
-            # We need a proper migration.
-            mv -f /lib/udev/rules.d/gandi.rules /lib/udev/rules.d/gandi.disabled
-            udevadm control --reload
-        fi
+		# the system uses autofs and customer rules handle /srv
+		if autofs_installed && autofs_handle_srv; then
+			disable_udev_disk_rules
+			disable_autofs_gandi
+		fi
+
+		# the system uses autofs and udevd is handling the additional disks
+		if autofs_installed && udev_handle_disk; then
+			disable_autofs_gandi
+		fi
+
+		# the system uses udevd
+		if ! autofs_installed; then
+			disable_autofs_gandi
+		fi
+
+		# Avoid two files with the same set of udev rules.
+		# XXX TODO We need a proper migration.
+		if [ -f /lib/udev/rules.d/gandi.rules ]; then
+			mv -f /lib/udev/rules.d/gandi.rules /lib/udev/rules.d/gandi.disabled
+			sed -i -e 's/^/#disabled#/g' /lib/udev/rules.d/gandi.disabled
+			udevadm control --reload
+		fi
 
         # obsolete and old plugins 
         rm -f /etc/gandi/plugins.d/04-config_network
