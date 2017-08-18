@@ -2,14 +2,8 @@
 
 key="${1}"
 
-if [ -d /proc/xen ]; then
-	exclude_disk="^xvd[az]"
-else
-	exclude_disk="^sd[az]"
-fi
-
-# list of additional disk
-disks=$(grep -o xvd[a-z1-9]* /proc/partitions | egrep -v "${exclude_disk}" | xargs)
+# list of additional disks
+disks=$(awk '/xvd[b-y][1-9]*/ || /sd[b-y][1-9]*/ { printf $NF" "  }' /proc/partitions)
 
 # looking in all the available disk
 for disk in $disks; do
