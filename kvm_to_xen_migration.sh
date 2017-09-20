@@ -138,3 +138,21 @@ if [ -f /etc/securetty ]; then
         echo "${console}" >> /etc/securetty
     fi
 fi
+
+f_='/etc/fstab'
+if [ -f "${f_}" ]; then
+    if grep -qE '^[[:space:]]*/dev/sd[[:alpha:]][[:digit:]]* ' "${f_}"; then
+        printf "\n$(tput bold)$(tput setaf 9)WARNING:$(tput sgr0) You MUST change your fstab before rebooting your VM or some disk"
+        printf "\n         will fail to be mounted and boot will abort, allowing you only"
+        printf "\n         to recover your VM with the console.\n"
+    fi
+    for d in $(egrep -o '^[[:space:]]*/dev/sd[[:alpha:]][[:digit:]]*' "${f_}") ; do
+        device="$(echo ${d} | tr -d '[[:space:]]')"
+        uuid=$(blkid -o value -s UUID "${device}")
+        line=$(grep "$d" "${f_}")
+        newline=$(echo "${line}" | sed -e "s,^[[:space:]]*${device},UUID=${uuid}\t,")
+        printf "In the file /etc/fstab, replace:\n    ${line}\nwith:\n    ${newline}\n"
+    done
+fi
+
+exit 0
