@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.30) unstable; urgency=medium
+
+  * Inform customer of change in fstab during the migration to Xen
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Fri, 22 Sep 2017 10:16:54 +0200
+
 gandi-hosting-vm2 (2.29) unstable; urgency=medium
 
   [Vincent Legout]
