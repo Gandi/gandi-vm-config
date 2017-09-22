@@ -89,7 +89,7 @@ dist:   deb
 		$(PKGNAME)-$(VERSION_MAJOR)
 
 rpm:	dist rpm_prepare
-	rpmbuild -bb rpm/SPECS/$(PKGNAME).spec
+	rpmbuild -bb ${RPMBUILDROOT}/SPECS/$(PKGNAME).spec
 
 rpm_prepare:
 	cp debian/$(PKGNAME)-$(VERSION).tar.bz2 ${RPMBUILDROOT}/SOURCES/
