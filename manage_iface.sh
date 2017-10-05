@@ -74,7 +74,7 @@ iface_up() {
         rm -f /var/lib/dhclient.eth0.leases /var/lib/dhclient.leases
         dhbin="/sbin/dhclient"
         [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
-        $dhbin -1 -q "$1"
+        $dhbin -1 -q -pf "/var/run/dhclient.$1.pid" "$1"
         stop_dhcp_client "$1"
     fi
 
