@@ -82,6 +82,10 @@ cp -raf %{sourcedir}/lib/udev/ $RPM_BUILD_ROOT/lib/
 mkdir -p $RPM_BUILD_ROOT/etc/pki/rpm-gpg
 cp -af %{sourcedir}/etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi $RPM_BUILD_ROOT/etc/pki/rpm-gpg/
 
+install -d -m 0755 $RPM_BUILD_ROOT/usr/lib/sysctl.d/
+install -m 0644 %{sourcedir}/usr/lib/sysctl.d/90-gandi.conf \
+    $RPM_BUILD_ROOT/usr/lib/sysctl.d/90-gandi.conf
+
 #mkdir -p $RPM_BUILD_ROOT/etc/auto.master.d
 #cp -af %{sourcedir}/etc/auto.master.d/gandi.autofs $RPM_BUILD_ROOT/etc/auto.master.d/
 #cp -af %{sourcedir}/etc/auto.gandi $RPM_BUILD_ROOT/etc
@@ -254,6 +258,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/pki/rpm-gpg/RPM-GPG-KEY-Gandi
 /etc/gandi/plugins-lib
 /etc/gandi/sysctl.conf
+/usr/lib/sysctl.d/90-gandi.conf
 /usr/share/gandi/systemd/gandi-config.service
 /usr/share/gandi/systemd/gandi-mount.service
 /usr/share/gandi/systemd/gandi-postboot.service

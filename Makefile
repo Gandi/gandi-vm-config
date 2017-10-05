@@ -82,6 +82,9 @@ dist:   deb
 	install -d -m 0755 debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/pki/rpm-gpg/
 	install -m 0644 ./keys/RPM-GPG-KEY-Gandi \
 		debian/$(PKGNAME)-$(VERSION_MAJOR)/etc/pki/rpm-gpg/
+	install -d -m 0755 debian/$(PKGNAME)-$(VERSION_MAJOR)/usr/lib/sysctl.d/
+	install -m 0644 sysctl_systemd.conf \
+		debian/$(PKGNAME)-$(VERSION_MAJOR)/usr/lib/sysctl.d/90-gandi.conf
 	#
 	# create the tarball used during the rpm build process
 	gzip -9 debian/$(PKGNAME)-$(VERSION_MAJOR)/changelog
