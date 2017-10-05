@@ -65,7 +65,7 @@ endif
 	install -m 0755 ./gandi-mount/gandi-mount	$(DESTDIR)/etc/init.d
 	install -m 0755 ./gandi-config/gandi-postboot	$(DESTDIR)/etc/init.d
 	install -m 0755 ./gandi-config/gandi-bootstrap	$(DESTDIR)/etc/init.d
-	
+
 deb:
 	debuild -us -uc -b || dpkg-buildpackage -rfakeroot -uc -b
 
@@ -95,10 +95,11 @@ rpm:	dist rpm_prepare
 	rpmbuild -bb ${RPMBUILDROOT}/SPECS/$(PKGNAME).spec
 
 rpm_prepare:
+	mkdir -p ${RPMBUILDROOT}/{RPMS,SRPMS,SPECS,BUILD,TMP,SOURCES}
 	cp debian/$(PKGNAME)-$(VERSION).tar.bz2 ${RPMBUILDROOT}/SOURCES/
 	
-	# prepare the spec file for the build of the current version 
-	sed -e "s/\(%changelog\)/\1\n* $(shell date +"%a %b %d %Y") Gandi Maintainer <noc@gandi.net> $(VERSION)gnd\n- Bug fixing for packaging and scripts. See \/usr\/share\/doc\/$(PKGNAME)\/changelog.gz.\n/" \
+	# prepare the spec file for the build of the current version
+	sed -e "s/\(%changelog\)/\1\n* $(shell LANG=C date +"%a %b %d %Y") Gandi Maintainer <noc@gandi.net> $(VERSION)gnd\n- Bug fixing for packaging and scripts. See \/usr\/share\/doc\/$(PKGNAME)\/changelog.gz.\n/" \
 	  -e "s/^\(%define version \).*/\1$(VERSION_MAJOR)/" \
 	  rpm/$(PKGNAME).spec > $(RPMBUILDROOT)/SPECS/$(PKGNAME).spec
 
