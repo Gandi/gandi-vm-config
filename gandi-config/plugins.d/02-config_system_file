@@ -13,11 +13,11 @@ fsdevice_create() {
         return
     fi
 
-    # We create xvda if not already present. mostly none udev operating system.
+    # We create xvda if not already present. Often done by udev operating system.
+    device_name=/dev/xvda
     for idx in $(seq 1 2); do
-        device_name=/dev/xvda
-        [ $idx -ne 0 ] && device_name="$device_name$idx"
-        [ -e "$device_name" ] || mknod "$device_name" b 202 $idx
+        part_name="${device_name}${idx}"
+        [ -e "${part_name}" ] || mknod "${part_name}" b 202 ${idx}
     done
 }
 
@@ -40,24 +40,35 @@ fi
 
 # /etc/fstab
 config_file=/etc/fstab
-device_name=xvda1
+correct_root_device=xvda1
 
 if [ ! -d /proc/xen ]; then
-    device_name=sda
+    correct_root_device=sda
 fi
 
-if [ ! -e "$config_file" ] || \
-   ( ! egrep "^(UUID=|LABEL=|/dev/"$device_name").*/[\t ]*ext" \
-       "$config_file" > /dev/null ); then
-    [ -e "$config_file" ] && mv "$config_file" "${config_file}".ga-old
-    cat > "$config_file" << EOT
-/dev/$device_name    /                 ext4    rw,noatime,errors=remount-ro  0    1
-devpts        /dev/pts          devpts  defaults      0 0
-none          /proc             proc    rw,nosuid,noexec  0    0
+new_value=$(blkid -s UUID -o value "/dev/${correct_root_device}")
+[ ! -z "${new_value}" ] || new_value="/dev/${correct_root_device}"
+
+if [ ! -e "$config_file" ]; then
+    cat > "${config_file}" << EOT
+$new_value  /          ext4    rw,noatime,errors=remount-ro  0 1
+devpts      /dev/pts   devpts  defaults      0 0
+none        /proc      proc    rw,nosuid,noexec  0 0"
 EOT
+else
+    root_element=$(awk 'BEGIN { FS="[\t\s ]+" } { if ($2 == "/") { if ($1 !~ "^#" ) print $1 } }' \
+                  "${config_file}")
+    
+    if ! echo "${root_element}" | \
+       egrep -q "^(UUID=|LABEL=|${correct_root_device})"; then
+        cp -f "$config_file" "${config_file}".ga-old-$(date +"%d%m%Y_%H%M")
+        sed -i -e "s,${root_element},${new_value},g" "${config_file}"
+    fi
 fi
 
 fsdevice_create
+
+# -- code below is obsolete and should be removed in a near futur
 
 # hardware capability
 hwcap=1
