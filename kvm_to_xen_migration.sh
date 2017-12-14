@@ -109,7 +109,13 @@ if [ -f /etc/default/grub ]; then
         grub2-mkconfig -o /boot/grub/grub.cfg
 
         kernel=$(rpm -q --qf %{PROVIDEVERSION} kernel)
-        mkinitrd --force /boot/initramfs-${kernel}.x86_64.img ${kernel}.x86_64
+        output=$(mkinitrd --force /boot/initramfs-${kernel}.x86_64.img ${kernel}.x86_64 2>&1)
+        if echo "${output}" | grep -qi "fail"; then
+            printf "\n$(tput bold)$(tput setaf 9)WARNING:$(tput sgr0) we could not generate a ramdisk for kernel ${kernel}"
+            printf "\n         This usually means the kernel does not have the xen drivers."
+            printf "\n         Please be careful when rebooting as your system might not"
+            printf "\n         boot properly with grub.\n"
+        fi
     else
         update-grub2
     fi
