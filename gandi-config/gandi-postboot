@@ -24,14 +24,19 @@
 # author : Nicolas Chipaux <aegiap@gandi.net> for Gandi.net
 # all rights reserved.
 
-# Cutomer of the IaaS hosting can provide a script which will be executed as 
+# Customer of the IaaS hosting can provide a script which will be executed as
 # root on the virtual machine and find some configuration in a JSON form in
 # /gandi/config
 
 case "$1" in
     start|restart|reload)
-        export `grep ^CONFIG_ALLOW_MOUNT /etc/default/gandi`
-        if [ 0 -eq ${CONFIG_ALLOW_MOUNT} ] && [ -f /etc/default/autofs ]; then
+        if [ -d '/etc/sysconfig' ]; then
+            CONFIG_FILE='/etc/sysconfig/gandi'
+        else
+            CONFIG_FILE='/etc/default/gandi'
+        fi
+        export $(grep ^CONFIG_ALLOW_MOUNT "${CONFIG_FILE}")
+        if [ 0 -eq "${CONFIG_ALLOW_MOUNT}" ] && [ -f /etc/default/autofs ]; then
             service autofs stop
         fi
         if [ -x /gandi/init ]; then
