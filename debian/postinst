@@ -5,8 +5,8 @@
 # we need to disable the udev rules with the python script
 disable_udev_disk_rules() {
 	for f_ in /lib/udev/rules.d/gandi.disabled \
-			  /lib/udev/rules.d/gandi.rules \
-			  /etc/udev/rules.d/86-gandi.rules; do
+				/lib/udev/rules.d/gandi.rules \
+				/etc/udev/rules.d/86-gandi.rules; do
 		if [ -e "${f_}" ]; then
 			if ! grep -q '^#disabled#.*manage_data_disk.py' "${f_}"; then
 				sed -i -e "s/^\(.*manage_data_disk.py.*\)$/#disabled# \1/g" "${f_}" > /dev/null 2>&1
@@ -30,8 +30,8 @@ autofs_installed() {
 
 udev_handle_disk() {
 	for f_ in /lib/udev/rules.d/gandi.disabled \
-			  /lib/udev/rules.d/gandi.rules \
-			  /etc/udev/rules.d/86-gandi.rules; do
+				/lib/udev/rules.d/gandi.rules \
+				/etc/udev/rules.d/86-gandi.rules; do
 		if [ -e "${f_}" ]; then
 			egrep -q '^[^#].*manage_data_disk.py' ${f_} > /dev/null 2>&1
 			[ $? -eq 0 ] && return 0
@@ -47,124 +47,123 @@ autofs_handle_srv() {
 }
 
 case "$1" in
-    configure|upgrade)
+	configure|upgrade)
 
 		# We create ssh host key if not present.
 		if [ -z "$(find /etc/ssh/ -name 'ssh_host_*_key' -print -quit)" ]; then
 			LC_ALL=C LANG=C /usr/sbin/dpkg-reconfigure openssh-server -f noninteractive -p critical
 		fi
-    
-        # cleaning files from old installation
-        [ -d /etc/gandi/plugins-available ] && \
-            rm -rf /etc/gandi/plugins-available || true
-        [ -d /etc/gandi/plugins-enabled ]   && \
-            rm -rf /etc/gandi/plugins-enabled || true
+	
+		# cleaning files from old installation
+		[ -d /etc/gandi/plugins-available ] && \
+			rm -rf /etc/gandi/plugins-available || true
+		[ -d /etc/gandi/plugins-enabled ]   && \
+			rm -rf /etc/gandi/plugins-enabled || true
 
-        # systemd workaround
-        if [ -d /etc/systemd ]; then
-            for elt in mount bootstrap; do
-                initscript=/etc/init.d/gandi-$elt
-                tempfile=$(tempfile --mode 0600 --suffix gnd)
-    
-                sed -e "s,\(^# X-Start-After:.*\)udev,\1 boot.udev,g" \
-                    -e "s,\(^# Required-Start:.*\)udev,\1 boot.udev,g" \
-                    "$initscript" > "$tempfile"
-                if [ $? = 0 ]; then
-                    mv "$tempfile" "$initscript"
-                    chmod 0755 "$initscript"
-                    chown root:root "$initscript"
-                fi
-                rm -f "$tempfile" || true
-            done
+		# systemd workaround
+		if [ -d /etc/systemd ]; then
+			for elt in mount bootstrap; do
+				initscript=/etc/init.d/gandi-$elt
+				tempfile=$(tempfile --mode 0600 --suffix gnd)
 
-            if [ -d /etc/systemd/system/multi-user.target.wants ]; then
-                syswant=/etc/systemd/system/multi-user.target.wants
-            else
-                syswant=/etc/systemd/system/default.target.wants
-            fi
+				sed -e "s,\(^# X-Start-After:.*\)udev,\1 boot.udev,g" \
+					-e "s,\(^# Required-Start:.*\)udev,\1 boot.udev,g" \
+					"$initscript" > "$tempfile"
+				if [ $? = 0 ]; then
+					mv "$tempfile" "$initscript"
+					chmod 0755 "$initscript"
+					chown root:root "$initscript"
+				fi
+				rm -f "$tempfile" || true
+			done
 
-            for elt in mount config postboot bootstrap; do 
-                rm -f "/lib/systemd/system/gandi-${elt}.service" || true
-                rm -f "$syswant/gandi-${elt}.service" || true
+			if [ -d /etc/systemd/system/multi-user.target.wants ]; then
+				syswant=/etc/systemd/system/multi-user.target.wants
+			else
+				syswant=/etc/systemd/system/default.target.wants
+			fi
 
-                srcfile="/usr/share/gandi/systemd/gandi-${elt}.service"
-                if [ -e "$srcfile" ]; then
-                    ln -sf "$srcfile" "/lib/systemd/system/" || true
-                    ln -sf "/lib/systemd/system/gandi-${elt}.service" \
-                           "${syswant}/" || true
-                fi
-            done 
-        fi
+			for elt in mount config postboot bootstrap; do 
+				rm -f "/lib/systemd/system/gandi-${elt}.service" || true
+				rm -f "$syswant/gandi-${elt}.service" || true
 
-        # config service
-        if [ -L /etc/rc2.d/S20gandi-config ]; then
-            update-rc.d -f gandi-config remove | \
-                grep -q "Removing any system startup" || true
-        fi
-        if [ ! -L /etc/rc2.d/S12gandi-config ] || \
-            [ ! -L /etc/rc2.d/S10gandi-config ] ; then
-            update-rc.d gandi-config start 10 2 3 4 5 . 2>&1 | \
-                egrep -v "warning:.*match LSB" | \
-                grep -q "Adding system startup" || true
-        fi
+				srcfile="/usr/share/gandi/systemd/gandi-${elt}.service"
+				if [ -e "$srcfile" ]; then
+					ln -sf "$srcfile" "/lib/systemd/system/" || true
+					ln -sf "/lib/systemd/system/gandi-${elt}.service" \
+						"${syswant}/" || true
+				fi
+			done 
+		fi
 
-        # older kernel service
-        if [ -L /etc/rc2.d/S11gandi-kernel ]; then
-            rm -f /etc/rc2.d/S11gandi-kernel
-        fi
+		# config service
+		if [ -L /etc/rc2.d/S20gandi-config ]; then
+			update-rc.d -f gandi-config remove | \
+				grep -q "Removing any system startup" || true
+		fi
+		if [ ! -L /etc/rc2.d/S12gandi-config ] || \
+			[ ! -L /etc/rc2.d/S10gandi-config ] ; then
+			update-rc.d gandi-config start 10 2 3 4 5 . 2>&1 | \
+				egrep -v "warning:.*match LSB" | \
+				grep -q "Adding system startup" || true
+		fi
 
-        # postboot service
-        update-rc.d gandi-postboot start 99 2 3 4 5 . 2>&1 | \
-            egrep -v "warning:.*match LSB" | \
-            grep -q "Adding system startup" || true
+		# older kernel service
+		if [ -L /etc/rc2.d/S11gandi-kernel ]; then
+			rm -f /etc/rc2.d/S11gandi-kernel
+		fi
 
-        # For gandi-mount and gandi-bootstrap services, it depends on the 
-        # distribution :
-        #
-        #  - Debian squeeze : checkroot.sh in rcS.d/S06 use dependency so 
-        #    gandi-mount in rcS.d/S07
-        #  - Debian lenny : checkroot.sh in rcS.d/S10 no dependency, so 
-        #    gandi-mount should be rcS.d/S11
-        #  - CentOS : rc.sysinit do the remount,rw. gandi-mount in rc3.d/S11
-        #  - Mandriva 2010.0 : rc.sysinit do the remount,rw. gandi-mount 
-        #    in rc3.d/S13 (specific patch in spec file)
-        #  - Ubuntu 7.10 : gandi-mount depends on udev, so 11 is the
-        #    minimum value. 38 is best as the system is available in r/w.
-        #    Previous value of 'start 7 S .' is too early.
-        #    New version of Ubuntu is using dependency between initscripts to 
-        #    deduce the boot order. 
-        
-        mount_start=20
+		# postboot service
+		update-rc.d gandi-postboot start 99 2 3 4 5 . 2>&1 | \
+			egrep -v "warning:.*match LSB" | \
+			grep -q "Adding system startup" || true
 
-        # debian
-        debversion=$(cat /etc/debian_version)
+		# For gandi-mount and gandi-bootstrap services, it depends on the 
+		# distribution :
+		#
+		#  - Debian squeeze : checkroot.sh in rcS.d/S06 use dependency so 
+		#    gandi-mount in rcS.d/S07
+		#  - Debian lenny : checkroot.sh in rcS.d/S10 no dependency, so 
+		#    gandi-mount should be rcS.d/S11
+		#  - CentOS : rc.sysinit do the remount,rw. gandi-mount in rc3.d/S11
+		#  - Mandriva 2010.0 : rc.sysinit do the remount,rw. gandi-mount 
+		#    in rc3.d/S13 (specific patch in spec file)
+		#  - Ubuntu 7.10 : gandi-mount depends on udev, so 11 is the
+		#    minimum value. 38 is best as the system is available in r/w.
+		#    Previous value of 'start 7 S .' is too early.
+		#    New version of Ubuntu is using dependency between initscripts to 
+		#    deduce the boot order. 
+		mount_start=20
 
-        # lenny
-        ret=$(expr match "$debversion" '^5.')
-        if [ $ret -ge 2 ]; then 
-            mount_start=11
-        fi
+		# debian
+		debversion=$(cat /etc/debian_version)
 
-        # etch
-        ret=$(expr match "$debversion" '^4.')
-        if [ $ret -ge 2 ]; then 
-            mount_start=11
-        fi
+		# lenny
+		ret=$(expr match "$debversion" '^5.')
+		if [ $ret -ge 2 ]; then 
+			mount_start=11
+		fi
 
-        # squeeze
-        # since this version initscripts management use dependancies.
-        # update-rc.d will use the correct number to start the service
-        # at the right moment : after checkroot.sh and rw remount
+		# etch
+		ret=$(expr match "$debversion" '^4.')
+		if [ $ret -ge 2 ]; then 
+			mount_start=11
+		fi
 
-        update-rc.d gandi-mount start ${mount_start} S . 2>&1 | \
-            egrep -v "warning:.*match LSB" | \
-            grep -q "Adding system startup" || true 
+		# squeeze
+		# since this version initscripts management use dependancies.
+		# update-rc.d will use the correct number to start the service
+		# at the right moment : after checkroot.sh and rw remount
+
+		update-rc.d gandi-mount start ${mount_start} S . 2>&1 | \
+			egrep -v "warning:.*match LSB" | \
+			grep -q "Adding system startup" || true 
 
 
-        # Start bootstrap a little before mount service.
-        update-rc.d gandi-bootstrap start $(( ${mount_start} -2 )) S . 2>&1 | \
-            egrep -v "warning:.*match LSB" | \
-            grep -q "Adding system startup" || true 
+		# Start bootstrap a little before mount service.
+		update-rc.d gandi-bootstrap start $(( ${mount_start} -2 )) S . 2>&1 | \
+			egrep -v "warning:.*match LSB" | \
+			grep -q "Adding system startup" || true 
 
 		# Debian stretch
 		ret=$(expr match "$debversion" '^9.')
@@ -196,43 +195,43 @@ case "$1" in
 			udevadm control --reload
 		fi
 
-        # obsolete and old plugins 
-        rm -f /etc/gandi/plugins.d/04-config_network
-        rm -f /etc/gandi/plugins.d/06-vm-fix-cron
-        rm -f /etc/gandi/plugins.d/05-vm-fix-ext3
-        rm -f /etc/gandi/plugins.d/07-vm-fix-gandikey
-        rm -f /etc/gandi/plugins.d/07-timezone
-        rm -f /etc/gandi/plugins.d/09-config_timezone
-        rm -f /etc/gandi/plugins-libs.sh
+		# obsolete and old plugins 
+		rm -f /etc/gandi/plugins.d/04-config_network
+		rm -f /etc/gandi/plugins.d/06-vm-fix-cron
+		rm -f /etc/gandi/plugins.d/05-vm-fix-ext3
+		rm -f /etc/gandi/plugins.d/07-vm-fix-gandikey
+		rm -f /etc/gandi/plugins.d/07-timezone
+		rm -f /etc/gandi/plugins.d/09-config_timezone
+		rm -f /etc/gandi/plugins-libs.sh
 
-        # obsolete plugins in 1.2 version
-        rm -f /etc/gandi/plugins.d/04-config_local_network
-        rm -f /etc/gandi/plugins.d/05-config_hostname
-        rm -f /etc/gandi/plugins.d/06-config_nameserver
-        rm -f /etc/gandi/plugins.d/08-config_user_group
-        rm -f /etc/gandi/plugins.d/12-vm-fix-umask
-        rm -f /etc/gandi/plugins.d/15-misc
-        rm -f /etc/gandi/dhclient-exit-hooks
-        rm -f /etc/gandi/dhcp-postconf
-        rm -f /etc/gandi/dhcp-hostname
-        rm -f /etc/gandi/dhcp-hostname-static-net
-        rm -rf /etc/gandi/bootstrap.d
+		# obsolete plugins in 1.2 version
+		rm -f /etc/gandi/plugins.d/04-config_local_network
+		rm -f /etc/gandi/plugins.d/05-config_hostname
+		rm -f /etc/gandi/plugins.d/06-config_nameserver
+		rm -f /etc/gandi/plugins.d/08-config_user_group
+		rm -f /etc/gandi/plugins.d/12-vm-fix-umask
+		rm -f /etc/gandi/plugins.d/15-misc
+		rm -f /etc/gandi/dhclient-exit-hooks
+		rm -f /etc/gandi/dhcp-postconf
+		rm -f /etc/gandi/dhcp-hostname
+		rm -f /etc/gandi/dhcp-hostname-static-net
+		rm -rf /etc/gandi/bootstrap.d
 
-        # obsolete plugins in gandi-hosting-vm2 version
-        rm -rf /etc/gandi/plugins.d/00-config_swap
-        rm -rf /etc/gandi/plugins.d/10-config_sysctl
+		# obsolete plugins in gandi-hosting-vm2 version
+		rm -rf /etc/gandi/plugins.d/00-config_swap
+		rm -rf /etc/gandi/plugins.d/10-config_sysctl
 
-        [ -d /var/gandi ] || mkdir /var/gandi
-    ;;
+		[ -d /var/gandi ] || mkdir /var/gandi
+	;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
-        # nothing
-    ;;
+	abort-upgrade|abort-remove|abort-deconfigure)
+		# nothing
+	;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+		echo "postinst called with unknown argument \`$1'" >&2
+		exit 1
+	;;
 esac
 
 #DEBHELPER#
