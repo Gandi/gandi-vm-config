@@ -90,8 +90,7 @@ case "$1" in
 				srcfile="/usr/share/gandi/systemd/gandi-${elt}.service"
 				if [ -e "$srcfile" ]; then
 					ln -sf "$srcfile" "/lib/systemd/system/" || true
-					ln -sf "/lib/systemd/system/gandi-${elt}.service" \
-						"${syswant}/" || true
+					systemctl enable gandi-${elt}.service || true
 				fi
 			done 
 		fi
@@ -138,6 +137,19 @@ case "$1" in
 		# debian
 		debversion=$(cat /etc/debian_version)
 
+		# LSB
+		lsb=''
+		if command -v lsb_release > /dev/null; then
+			lsb=$(command -v lsb_release)
+		fi
+
+		lsb_release=''
+		lsb_distrib=''
+		if [ ! -z ${lsb} ]; then
+			lsb_release=$("${lsb}" -rs)
+			lsb_distrib=$("${lsb}" -is)
+		fi
+
 		# lenny
 		ret=$(expr match "$debversion" '^5.')
 		if [ $ret -ge 2 ]; then 
@@ -166,9 +178,17 @@ case "$1" in
 			grep -q "Adding system startup" || true 
 
 		# Debian stretch
-		ret=$(expr match "$debversion" '^9.')
-		if [ $ret -ge 2 ]; then
-			disable_udev_disk_rules
+		if [ 'Debian' = "${lsb_distrib}" ] || [ 'debian' = "${lsb_distrib}" ]; then
+			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 8 ]; then
+				disable_udev_disk_rules
+			fi
+		fi
+
+		# Ubuntu bionic
+		if [ 'Ubuntu' = "${lsb_distrib}" ] || [ 'ubuntu' = "${lsb_distrib}" ]; then
+			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 17 ]; then
+				disable_udev_disk_rules
+			fi
 		fi
 
 		# the system uses autofs and customer rules handle /srv
