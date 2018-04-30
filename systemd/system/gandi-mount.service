@@ -9,6 +9,9 @@ DefaultDependencies=true
 ConditionPathIsReadWrite=/
 After=local-fs.target remote-fs.target gandi-config.service
 
+[Install]
+WantedBy=multi-user.target
+
 [Service]
 Type=oneshot
 RemainAfterExit=no
