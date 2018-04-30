@@ -1,3 +1,14 @@
+gandi-hosting-vm2 (2.32) unstable; urgency=medium
+
+  [Nicolas Chipaux]
+  * Enable autofs on Ubuntu 18.04
+  * Improve systemd activation
+
+  [Vincent Legout]
+  * Warn when ramdisk generation failed on CentOS
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Mon, 30 Apr 2018 11:28:00 +0200
+
 gandi-hosting-vm2 (2.31) unstable; urgency=medium
 
   * Fix multiple network interface config for CentOS
