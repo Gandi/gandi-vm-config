@@ -37,9 +37,14 @@ An automount configuration is available for newer system. It uses the /etc/auto.
 User or application will be able to access directly the content of the virtual disk. After a long amount of time without access, the virtual disk is automaticaly umounted.
 
 To disable the autofs automatic handling:
- - edit /etc/auto.master.d/gandi.autofs and comment (add '#') at the beginning of line containing "/srv	/etc/auto.gandi".
- - then restart autofs with the command 'service autofs restart'
+ - edit /etc/auto.master.d/gandi.autofs and comment (add '#') at the beginning of line containing "/srv	/etc/auto.gandi",
+ - then restart autofs with the command 'service autofs restart'.
 
+To activate automounting in *another mountpoint*:
+ - edit /etc/auto.master.d/gandi.autofs and change /srv at the beginning of the only line in the file to your chosen mount point,
+ - then restart autofs with the command 'service autofs restart'.
+
+**Note**: the `CONFIG_DISK_ROOT` variable in `/etc/{default,sysconfig}/gandi` is not used by the autofs setup as auto.master files cannot have dynamic content for configuration.
 
 ## CONFIGURATION
 

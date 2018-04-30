@@ -34,6 +34,9 @@ CONFIG_MOUNT_PARAMS="rw,nosuid,nodev,noatime"
 
 # mount the additional disk in this directory
 # example : /dev/xvdb in /srv/mydatadisk
+# This variable is not used by the autofs setup to automaticaly
+# mount the extra disk. It is only used by the python script
+# called by udev.
 CONFIG_DISK_ROOT="/srv"
 
 # set a list of network interfaces which should not be configured by DHCP
