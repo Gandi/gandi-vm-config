@@ -16,6 +16,13 @@ disable_udev_disk_rules() {
 	udevadm control --reload
 }
 
+enable_autofs_gandi() {
+	f_='/etc/auto.master.d/gandi.autofs'
+	[ -e "${f_}" ] || return 1
+	sed -i -e 's,^[\s\t]*#\(.*\),\1,g' "${f_}" > /dev/null 2>&1
+	return $?
+}
+
 disable_autofs_gandi() {
 	f_='/etc/auto.master.d/gandi.autofs'
 	[ -e "${f_}" ] || return 1
@@ -131,7 +138,7 @@ case "$1" in
 		#    minimum value. 38 is best as the system is available in r/w.
 		#    Previous value of 'start 7 S .' is too early.
 		#    New version of Ubuntu is using dependency between initscripts to 
-		#    deduce the boot order. 
+		#    deduce the boot order.
 		mount_start=20
 
 		# debian
@@ -152,13 +159,13 @@ case "$1" in
 
 		# lenny
 		ret=$(expr match "$debversion" '^5.')
-		if [ $ret -ge 2 ]; then 
+		if [ $ret -ge 2 ]; then
 			mount_start=11
 		fi
 
 		# etch
 		ret=$(expr match "$debversion" '^4.')
-		if [ $ret -ge 2 ]; then 
+		if [ $ret -ge 2 ]; then
 			mount_start=11
 		fi
 
@@ -169,13 +176,12 @@ case "$1" in
 
 		update-rc.d gandi-mount start ${mount_start} S . 2>&1 | \
 			egrep -v "warning:.*match LSB" | \
-			grep -q "Adding system startup" || true 
-
+			grep -q "Adding system startup" || true
 
 		# Start bootstrap a little before mount service.
 		update-rc.d gandi-bootstrap start $(( ${mount_start} -2 )) S . 2>&1 | \
 			egrep -v "warning:.*match LSB" | \
-			grep -q "Adding system startup" || true 
+			grep -q "Adding system startup" || true
 
 		# Debian stretch
 		if [ 'Debian' = "${lsb_distrib}" ] || [ 'debian' = "${lsb_distrib}" ]; then
@@ -202,6 +208,11 @@ case "$1" in
 			disable_autofs_gandi
 		fi
 
+		# the system use autofs and udev rule is disabled
+		if autofs_installed && ! udev_handle_disk; then
+			enable_autofs_gandi
+		fi
+
 		# the system uses udevd
 		if ! autofs_installed; then
 			disable_autofs_gandi
@@ -215,7 +226,7 @@ case "$1" in
 			udevadm control --reload
 		fi
 
-		# obsolete and old plugins 
+		# obsolete and old plugins
 		rm -f /etc/gandi/plugins.d/04-config_network
 		rm -f /etc/gandi/plugins.d/06-vm-fix-cron
 		rm -f /etc/gandi/plugins.d/05-vm-fix-ext3
