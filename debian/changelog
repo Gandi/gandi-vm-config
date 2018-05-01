@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.33) unstable; urgency=medium
+
+  * Enable autofs when needed.
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Tue, 01 May 2018 20:50:42 +0200
+
 gandi-hosting-vm2 (2.32) unstable; urgency=medium
 
   [Nicolas Chipaux]
