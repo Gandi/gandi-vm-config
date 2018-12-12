@@ -40,15 +40,16 @@ udev_handle_disk() {
 				/lib/udev/rules.d/gandi.rules \
 				/etc/udev/rules.d/86-gandi.rules; do
 		if [ -e "${f_}" ]; then
-			egrep -q '^[^#].*manage_data_disk.py' ${f_} > /dev/null 2>&1
-			[ $? -eq 0 ] && return 0
+			if grep -E -q '^[^#].*manage_data_disk.py' ${f_} > /dev/null 2>&1; then
+				return 0
+			fi
 		fi
 	done
 	return 1
 }
 
 autofs_handle_srv() {
-	list_files=`ls -1 /etc/auto.master /etc/auto.master.d/*.autofs | grep -v gandi.autofs | xargs`
+	list_files=$(ls -1 /etc/auto.master /etc/auto.master.d/*.autofs | grep -v gandi.autofs | xargs)
 	grep -q ^/srv ${list_files} > /dev/null 2>&1
 	return $?
 }
@@ -62,10 +63,12 @@ case "$1" in
 		fi
 	
 		# cleaning files from old installation
-		[ -d /etc/gandi/plugins-available ] && \
+		if [ -d /etc/gandi/plugins-available ]; then
 			rm -rf /etc/gandi/plugins-available || true
-		[ -d /etc/gandi/plugins-enabled ]   && \
+		fi
+		if [ -d /etc/gandi/plugins-enabled ]; then
 			rm -rf /etc/gandi/plugins-enabled || true
+		fi
 
 		# LSB
 		lsb=''
@@ -75,21 +78,21 @@ case "$1" in
 
 		lsb_release=''
 		lsb_distrib=''
-		if [ ! -z ${lsb} ]; then
+		if [ ! -z "${lsb}" ]; then
 			lsb_release=$("${lsb}" -rs)
 			lsb_distrib=$("${lsb}" -is)
 		fi
 
 		# Debian stretch
 		if [ 'Debian' = "${lsb_distrib}" ] || [ 'debian' = "${lsb_distrib}" ]; then
-			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 8 ]; then
+			if [ $(echo "${lsb_release}" | cut -d'.' -f1) -gt 8 ]; then
 				disable_udev_disk_rules
 			fi
 		fi
 
 		# Ubuntu bionic
 		if [ 'Ubuntu' = "${lsb_distrib}" ] || [ 'ubuntu' = "${lsb_distrib}" ]; then
-			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 17 ]; then
+			if [ $(echo "${lsb_release}" | cut -d'.' -f1) -gt 17 ]; then
 				disable_udev_disk_rules
 			fi
 		fi
