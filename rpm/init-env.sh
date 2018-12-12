@@ -19,5 +19,10 @@ buildarchtranslate: i486: i586
 buildarchtranslate: i586: i586
 buildarchtranslate: i686: i586" > ~/.rpmrc
 
-[ -e gandi-hosting-vm2.spec ] && \
-    cp gandi-hosting-vm2.spec ~/rpm/SPECS/
+if [ -e gandi-hosting-vm3.spec ]; then
+	install -m 0644 gandi-hosting-vm3.spec ~/rpm/SPECS/
+else
+	if [ -e gandi-hosting-vm2.spec ]; then
+		install -m 0644 gandi-hosting-vm2.spec ~/rpm/SPECS/
+	fi
+fi
