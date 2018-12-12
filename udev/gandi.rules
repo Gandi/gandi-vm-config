@@ -1,12 +1,12 @@
 #
-# mount disk attached to the local system
+# Rules for GANDI IaaS hosting
 #
 
-# complete automounting support for virtual disk
-SUBSYSTEMS=="xen", DRIVERS=="vbd", SUBSYSTEM=="block", RUN+="fake_blkid -o udev -p $tempnode", RUN+="/etc/gandi/manage_data_disk.py", OPTIONS+="last_rule"
-# simple notification for virtual disk. no automounting
-#SUBSYSTEMS=="xen", DRIVERS=="vbd", SUBSYSTEM=="block", RUN+="fake_blkid -o udev -p $tempnode", RUN+="/etc/gandi/manage_data_disk.sh"
-SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ENV{ID_VENDOR}=="gandi.ne", RUN+="fake_blkid -o udev -p $tempnode", RUN+="/etc/gandi/manage_data_disk.py", OPTIONS+="last_rule"
+## complete automounting support for virtual disk
+#SUBSYSTEMS=="xen", DRIVERS=="vbd", SUBSYSTEM=="block", RUN+="fake_blkid -o udev -p $tempnode", RUN+="/etc/gandi/manage_data_disk.py", OPTIONS+="last_rule"
+## simple notification for virtual disk. no automounting
+##SUBSYSTEMS=="xen", DRIVERS=="vbd", SUBSYSTEM=="block", RUN+="fake_blkid -o udev -p $tempnode", RUN+="/etc/gandi/manage_data_disk.sh"
+#SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ENV{ID_VENDOR}=="gandi.ne", RUN+="fake_blkid -o udev -p $tempnode", RUN+="/etc/gandi/manage_data_disk.py", OPTIONS+="last_rule"
 
 
 #
