@@ -1,8 +1,0 @@
-#
-# post-disk-attach
-#
-
-# params available for this script :
-# $1 : device name
-# $2 : filessytem type
-# $3 : mountpoint of the device

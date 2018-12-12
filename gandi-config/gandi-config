@@ -57,10 +57,6 @@ do_start() {
 case "$1" in
     start|restart|reload)
 	do_start
-
-        if [ -e "$GANDI_HOOK_DIR"/post-vm-config ]; then
-            "$GANDI_HOOK_DIR"/post-vm-config
-        fi
     ;;
     stop|force-reload|status)
 	# nothing

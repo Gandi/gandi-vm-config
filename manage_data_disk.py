@@ -135,26 +135,6 @@ def pre_add(device, fs_type, mountpoint):
         return
 
 
-def post_add(device, fs_type, mountpoint):
-    """ shell hook called after attaching and mounting a disk """
-
-    if debug:
-        syslog.syslog("%s: call shell hook post-disk-attach" % device)
-    run_command('call shell hook in post add', '%s/post-disk-attach %s %s %s' %
-        (load_hook_dir(config_file), device, fs_type, mountpoint))
-    return
-
-
-def pre_delete(device, mountpoint):
-    """ shell hook called before umount and detaching a disk """
-
-    if debug:
-        syslog.syslog("%s: call shell hook pre-disk-detach" % device)
-    run_command('call shell hook in pre delete', '%s/pre-disk-detach %s %s' %
-        (load_hook_dir(config_file), device, mountpoint))
-    return
-
-
 def on_add(device, mountpoint):
     """ mount a device on a defined mountpoint. """
 
@@ -552,7 +532,6 @@ def main():
             syslog.syslog('%s: action is %s, calling on_add()' %
                 (device, os.environ['ACTION']))
         on_add(device, mountpoint)
-        post_add(device, fs_type, mountpoint)
 
     # For disk in SATA, we set a bogus ID_VENDOR
     if 'ID_VENDOR' not in os.environ:
@@ -564,7 +543,6 @@ def main():
         if debug:
             syslog.syslog('%s: action is %s, calling on_delete()' %
                 (device, os.environ['ACTION']))
-        pre_delete(device, mountpoint)
         on_delete(device, mountpoint)
 
 try:
