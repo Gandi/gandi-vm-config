@@ -1,3 +1,0 @@
-gandi-hosting-vm2 binary: udev-rule-in-etc etc/udev/rules.d/86-gandi.rules
-gandi-hosting-vm2 binary: init.d-script-missing-dependency-on-remote_fs etc/init.d/gandi-mount: required-start
-

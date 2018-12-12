@@ -1,3 +1,9 @@
+gandi-hosting-vm3 (3.0) unstable; urgency=medium
+
+  * New version with less code
+
+ -- Nicolas Chipaux <aegiap@gandi.net>  Wed, 12 Dec 2018 16:50:07 +0100
+
 gandi-hosting-vm2 (2.33) unstable; urgency=medium
 
   * Enable autofs when needed.

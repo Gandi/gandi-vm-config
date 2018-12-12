@@ -3,40 +3,12 @@
 
 #export DH_VERBOSE=1
 
-# -------------------
-# In a near futur, will should be able to replace all
-# the Makefile entries with:
-#%:
-#	dh $@
-# -------------------
+%:
+	dh $@
 
-build:
-	dh_testdir
+override_dh_auto_build::
+	# nothing to do
 
-clean:
-	dh_testdir
-	dh_testroot
-	-$(MAKE) clean
-	dh_clean 
+override_dh_auto_configure::
+	# nothing to do
 
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k 
-	dh_installdirs
-	$(MAKE) install
-
-binary: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-.PHONY: build clean binary install

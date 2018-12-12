@@ -1,11 +1,11 @@
-Source: gandi-hosting-vm2
+Source: gandi-hosting-vm3
 Section: admin
 Priority: optional
 Maintainer: Nicolas Chipaux <aegiap@gandi.net>
-Build-Depends: debhelper (>= 5)
+Build-Depends: debhelper (>= 8)
 Standards-Version: 3.7.2
 
-Package: gandi-hosting-vm2
+Package: gandi-hosting-vm3
 Architecture: all
 Depends: openssl,
  udev,
@@ -16,27 +16,19 @@ Depends: openssl,
  python,
  acpid,
  acpi-support-base | acpi-support
-Recommends: gdisk
-Suggests: autofs
+Suggests: autofs, cloud-init
 Conflicts: gandi-hosting-agent, 
  gandi-hosting-agent-schemes,
  gandi-hosting-agent-plugins-internal-debian, 
  gandi-hosting-agent-plugins-internal-unix,
- gandi-hosting-vm
-Replaces: gandi-hosting-vm
-Provides: gandi-hosting-vm
+ gandi-hosting-vm,
+ gandi-hosting-vm2
+Replaces: gandi-hosting-vm, gandi-hosting-vm2
+Provides: gandi-hosting-vm, gandi-hosting-vm2
 Description: scripts for virtual machine on Gandi IaaS
  Collection of script to handle dynamic resources of virtual
  machine on Gandi IaaS hosting solution. most configuration
  is done during the first and subsequent boot.
- .
- services:
-  - gandi-postboot: execute customer scrip to setup the virtual
-  machine.
-  - gandi-config: configure the system during boot
-  - gandi-mount  : if virtual disk is not detected and already
-  mounted, this service start a udev call to re-attach all 
-  available unmounted virtual disks.
  .
  In case of GPT partition on disk, you should install gdisk to
  handle the partitions.

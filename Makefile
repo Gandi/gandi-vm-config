@@ -3,7 +3,7 @@
 OS = $(shell uname -s)
 OS : sh = uname -s
 SHELL=/bin/bash
-PKGNAME=gandi-hosting-vm2
+PKGNAME=gandi-hosting-vm3
 RPMBUILDROOT=./rpm/
 DESTDIR=./debian/$(PKGNAME)
 
