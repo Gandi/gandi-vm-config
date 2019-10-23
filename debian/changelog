@@ -1,3 +1,16 @@
+gandi-hosting-vm2 (2.34) unstable; urgency=medium
+
+  [Nicolas Belouin]
+  * Update links to documentation in motd
+
+  [Nicolas Chipaux]
+  * Avoid overwriting /etc/fstab
+
+  [David Sinquin]
+  * Use /etc/sysconfig insteand of /etc/default on CentOS
+
+ -- Nicolas Belouin <nicolas.belouin@gandi.net>  Wed, 23 Oct 2019 14:41:43 +0000
+
 gandi-hosting-vm2 (2.33) unstable; urgency=medium
 
   * Enable autofs when needed.
