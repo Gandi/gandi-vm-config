@@ -53,6 +53,12 @@ autofs_handle_srv() {
 	return $?
 }
 
+decompress_lz4_kernel() {
+	for kernel in /boot/vmlinuz-*;
+		do /usr/share/gandi/decompress-kernel "$kernel";
+	done
+}
+
 case "$1" in
 	configure|upgrade)
 
@@ -188,6 +194,7 @@ case "$1" in
 			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 8 ]; then
 				disable_udev_disk_rules
 			fi
+			decompress_lz4_kernel
 		fi
 
 		# Ubuntu bionic
@@ -195,6 +202,7 @@ case "$1" in
 			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 17 ]; then
 				disable_udev_disk_rules
 			fi
+			decompress_lz4_kernel
 		fi
 
 		# the system uses autofs and customer rules handle /srv
@@ -253,6 +261,7 @@ case "$1" in
 		rm -rf /etc/gandi/plugins.d/10-config_sysctl
 
 		[ -d /var/gandi ] || mkdir /var/gandi
+
 	;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
