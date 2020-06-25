@@ -15,7 +15,10 @@ Depends: openssl,
  module-init-tools | kmod,
  python,
  acpid,
- acpi-support-base | acpi-support
+ acpi-support-base | acpi-support,
+ mktemp | coreutils,
+ binutils,
+ lz4 | liblz4-tool
 Recommends: gdisk
 Suggests: autofs
 Conflicts: gandi-hosting-agent, 

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+
+KERNEL_PATH="$1"
+
+LZ4_PATTERN=$(printf '\002!L\030')
+
+if grep -aq "${LZ4_PATTERN}" "${KERNEL_PATH}"; then
+	echo "Kernel is compressed with LZ4, decompressing ${KERNEL_PATH}" >&2
+	tmp_file=$(mktemp /tmp/raw-kernel-XXXX)
+	if [ $? -gt 0 ]; then
+		echo "Cannot create temporary file. Exiting...";
+		exit 1;
+	fi
+	trap "rm -f ${tmp_file}" 0 2
+	/usr/share/gandi/extract-vmlinux "${KERNEL_PATH}" > "${tmp_file}"
+
+	if ! readelf -h ${tmp_file} > /dev/null; then 
+		echo "Failed to decompress kernel. Exiting..." >&2
+		exit 1
+	fi
+	echo "Decompressed kernel from ${KERNEL_PATH}" >&2
+	echo "Replacing original file..." >&2
+	mv "${tmp_file}" "${KERNEL_PATH}"
+else
+	echo "Kernel is not compressed using LZ4. Exiting..." >&2
+fi

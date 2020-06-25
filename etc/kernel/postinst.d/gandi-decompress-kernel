@@ -1,0 +1,5 @@
+#!/bin/sh
+
+KERNEL_PATH="$2"
+
+/usr/share/gandi/decompress-kernel "${KERNEL_PATH}"

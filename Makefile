@@ -55,6 +55,11 @@ ifeq ($(OS),Linux)
 	install -d -m 0750 $(DESTDIR)/etc/auto.master.d
 	install -m 0640 autofs/auto.master.d/gandi.autofs $(DESTDIR)/etc/auto.master.d/
 	install -m 0750 autofs/auto.gandi $(DESTDIR)/etc/
+
+	install -d ${DESTDIR}/etc/kernel/postinst.d
+	install -m 0750 ./etc/kernel/postinst.d/gandi-decompress-kernel ${DESTDIR}/etc/kernel/postinst.d/
+	install -m 0750 ./decompress-kernel ${DESTDIR}/usr/share/gandi/
+	install -m 0750 ./extract-vmlinux ${DESTDIR}/usr/share/gandi/
 endif
 	
 	install -d -m 0755 $(DESTDIR)/etc/default
