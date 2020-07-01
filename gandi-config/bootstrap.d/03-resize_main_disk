@@ -35,8 +35,8 @@ if which sgdisk >/dev/null && [ -b "$disk" ]; then
                         --typecode="${part_id}:${part_guid_code}" \
                         "$disk" 2>&1 | logger -t "$SYSLOG_TARGET"; then
                     err_code="$?"
-                    loginfo "Error resizing partition ${part_id} of GPT disk " \
-                            "${disk}, return: ${err_code}"
+                    msg="Error resizing partition ${part_id} of GPT disk ${disk}, return: ${err_code}"
+                    logger -t "$SYSLOG_TARGET" "$msg"
                     exit "$err_code"
                 fi
             fi
@@ -47,15 +47,16 @@ if which sgdisk >/dev/null && [ -b "$disk" ]; then
         if [ "$disk_guid" = '00000000-0000-0000-0000-000000000000' ]; then
             if ! sgdisk --randomize-guids "$disk" 2>&1 | logger -t "$SYSLOG_TARGET"; then
                 err_code="$?"
-                loginfo "Error randomizing GPT UIDs on disk ${disk}, return: ${err_code}"
+                msg="Error randomizing GPT UIDs on disk ${disk}, return: ${err_code}"
+                logger -t "$SYSLOG_TARGET" "$msg"
                 exit "$err_code"
             fi
         fi
         # Inform kernel of partition changes.
         if ! partx --update "$disk" 2>&1 | logger -t "$SYSLOG_TARGET"; then
             err_code="$?"
-            loginfo "Error updating in-kernel partition layout for disk " \
-                "${disk}, return: ${err_code}"
+            msg="Error updating in-kernel partition layout for disk ${disk}, return: ${err_code}"
+            logger -t "$SYSLOG_TARGET" "$msg"
             exit "$err_code"
         fi
     fi
@@ -76,7 +77,8 @@ if [ -e $device ]; then
         if [ -x "$resize2fs" ]; then
             if ! $resize2fs "$device" 2>&1 | logger -t "$SYSLOG_TARGET"; then
                 err_code="$?"
-                loginfo "Error resizing ext disk ${device}, return: ${err_code}"
+                msg="Error resizing ext disk ${device}, return: ${err_code}"
+                logger -t "$SYSLOG_TARGET" "$msg"
                 exit "${err_code}"
             fi
         fi
@@ -87,7 +89,8 @@ if [ -e $device ]; then
         if [ -x "$xfscmd" ]; then
             if ! $xfscmd "$device" 2>&1 | logger -t "$SYSLOG_TARGET"; then
                 err_code="$?"
-                loginfo "Error resizing XFS disk ${device}, return: ${err_code}"
+                msg="Error resizing XFS disk ${device}, return: ${err_code}"
+                logger -t "$SYSLOG_TARGET" "$msg"
                 exit "$err_code"
             fi
         fi
