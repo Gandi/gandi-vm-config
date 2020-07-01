@@ -72,10 +72,16 @@ iface_up() {
     dhcp_code=$?
     if [ 0 -eq $dhcp_code ] || [ 3 -eq $dhcp_code ]; then
         rm -f /var/lib/dhclient.eth0.leases /var/lib/dhclient.leases
-        dhbin="/sbin/dhclient"
-        [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
-        $dhbin -1 -q -pf "/var/run/dhclient.$1.pid" "$1"
-        stop_dhcp_client "$1"
+        if [ -x /usr/bin/systemctl ]; then
+            # systemd-udev put the script in a sandbox so we can't call
+            # dhclient directly.
+            /usr/bin/systemctl --no-block start "gandi-dhclient@$1.service"
+        else
+            dhbin="/sbin/dhclient"
+            [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
+            $dhbin -1 -q -pf "/var/run/dhclient.$1.pid" "$1"
+            stop_dhcp_client "$1"
+        fi
     fi
 
     if [ -e /sys/module/virtio_net ] && [ $CONFIG_MULTIQUEUE -eq 1 ]; then
@@ -137,4 +143,4 @@ esac
 
 exit 0
 
-# vim:ft=python:et:sw=4:ts=4:sta:tw=79:fileformat=unix
+# vim:et:sw=4:ts=4:sta:tw=79:fileformat=unix

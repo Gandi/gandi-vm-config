@@ -97,7 +97,7 @@ install -m 0644 %{sourcedir}/usr/lib/sysctl.d/90-gandi.conf \
 # only in case of uninstall of package.
 SYSTEMD=$(which systemd)
 if [ "$1" -eq 0 ]; then
-    for elt in mount config bootstrap postboot; do
+    for elt in mount config bootstrap postboot dhclient@; do
         if [ -e $SYSTEMD ]; then
             rm -f "/etc/systemd/system/default.target.wants/gandi-$elt"
             rm -f "/lib/systemd/system/gandi-$elt"
@@ -180,6 +180,11 @@ if [ -e $SYSTEMD ]; then
                    /etc/systemd/system/default.target.wants/ || true
         fi
     done
+    srcfile="/usr/share/gandi/systemd/gandi-dhclient@.service"
+    if [ -e "$srcfile" ]; then
+        ln -sf "$srcfile" /lib/systemd/system || true
+        ln -sf "$srcfile" /usr/lib/systemd/system || true
+    fi
 else
     if [ -x /sbin/chkconfig ]; then
         for elt in config mount postboot bootstrap; do
@@ -263,6 +268,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/gandi/systemd/gandi-mount.service
 /usr/share/gandi/systemd/gandi-postboot.service
 /usr/share/gandi/systemd/gandi-bootstrap.service
+/usr/share/gandi/systemd/gandi-dhclient@.service
 
 %changelog 
 * Fri Sep 19 2008 Nicolas Chipaux <aegiap@gandi.net> 1.0.0-1474-1gnd

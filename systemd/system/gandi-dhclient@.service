@@ -1,0 +1,13 @@
+[Unit]
+Description=dhclient on %I
+Wants=network.target
+Before=network.target
+BindsTo=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
+
+[Service]
+Type=forking
+ExecStart=/sbin/dhclient -4 -v -pf /run/dhclient.%I.pid -lf /var/lib/dhcp/dhclient.%I.leases %I
+
+[Install]
+WantedBy=multi-user.target

@@ -106,6 +106,10 @@ case "$1" in
 					systemctl enable gandi-${elt}.service || true
 				fi
 			done 
+
+			if [ -e "/usr/share/gandi/systemd/gandi-dhclient@.service" ]; then
+				ln -sf "/usr/share/gandi/systemd/gandi-dhclient@.service" "/lib/systemd/system/" || true
+			fi
 		fi
 
 		# config service
