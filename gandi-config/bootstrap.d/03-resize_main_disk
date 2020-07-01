@@ -59,6 +59,15 @@ if which sgdisk >/dev/null && [ -b "$disk" ]; then
             logger -t "$SYSLOG_TARGET" "$msg"
             exit "$err_code"
         fi
+
+        # ensure /dev/disk/ links are correctly set for disk
+        if command -v udevadm &> /dev/null; then
+            udevadm trigger "${disk}" 2>&1 | logger -t "$SYSLOG_TARGET"
+            udevadm settle 2>&1 | logger -t "$SYSLOG_TARGET"
+        elif command -v udevtrigger &> /dev/null; then
+            udevtrigger 2>&1 | logger -t "$SYSLOG_TARGET"
+            udevsettle 2>&1 | logger -t "$SYSLOG_TARGET"
+        fi
     fi
 fi
 
