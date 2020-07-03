@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.36) unstable; urgency=medium
+
+  * Clean packaging
+
+ -- Nautik <nautik1@n-p.fr>  Fri, 03 Jul 2020 14:40:29 +0200
+
 gandi-hosting-vm2 (2.35) unstable; urgency=medium
 
   [Nicolas Belouin]
