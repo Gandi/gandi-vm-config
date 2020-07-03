@@ -1,3 +1,16 @@
+gandi-hosting-vm2 (2.35) unstable; urgency=medium
+
+  [Nicolas Belouin]
+  * Manage_iface: Add support for sandboxed systemd-udev
+
+  [Corwind]
+  * Decompress LZ4 kernels on install and upgrade
+
+  [Nautik]
+  * Fix partition resize on first boot
+
+ -- Nautik <nautik1@n-p.fr>  Fri, 03 Jul 2020 10:26:35 +0200
+
 gandi-hosting-vm2 (2.34) unstable; urgency=medium
 
   [Nicolas Belouin]
