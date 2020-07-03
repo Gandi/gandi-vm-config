@@ -72,10 +72,13 @@ iface_up() {
     dhcp_code=$?
     if [ 0 -eq $dhcp_code ] || [ 3 -eq $dhcp_code ]; then
         rm -f /var/lib/dhclient.eth0.leases /var/lib/dhclient.leases
-        if [ -x /usr/bin/systemctl ]; then
+        systemctl=""
+        [ -x /bin/systemctl ] && systemctl="/bin/systemctl"
+        [ -x /usr/bin/systemctl ] && systemctl="/usr/bin/systemctl"
+        if [ -n "$systemctl" ]; then
             # systemd-udev put the script in a sandbox so we can't call
             # dhclient directly.
-            /usr/bin/systemctl --no-block start "gandi-dhclient@$1.service"
+            $systemctl --no-block start "gandi-dhclient@$1.service"
         else
             dhbin="/sbin/dhclient"
             [ -x /usr/sbin/dhclient ] && dhbin="/usr/sbin/dhclient"
