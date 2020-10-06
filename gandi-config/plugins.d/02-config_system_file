@@ -47,7 +47,11 @@ if [ ! -d /proc/xen ]; then
 fi
 
 new_value=$(blkid -s UUID -o value "/dev/${correct_root_device}")
-[ ! -z "${new_value}" ] || new_value="/dev/${correct_root_device}"
+if [ -z "${new_value}" ]; then
+    new_value="/dev/${correct_root_device}"
+else
+    new_value="UUID=${new_value}"
+fi
 
 if [ ! -e "$config_file" ]; then
     cat > "${config_file}" << EOT
