@@ -1,3 +1,14 @@
+gandi-hosting-vm2 (2.37) unstable; urgency=medium
+
+  [David Holl]
+  * Make python2 dependency explicit in both shebang and packaging.
+
+  [David Sinquin]
+  * config_system_file plugin: Fix UUID management for / in /etc/fstab and
+    remove useles code.
+
+ -- David Sinquin <david.sinquin@gandi.net>  Thu, 08 Oct 2020 14:00:34 +0200
+
 gandi-hosting-vm2 (2.36) unstable; urgency=medium
 
   * Clean packaging
