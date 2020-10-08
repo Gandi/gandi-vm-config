@@ -62,7 +62,7 @@ EOT
 else
     root_element=$(awk 'BEGIN { FS="[\t\s ]+" } { if ($2 == "/") { if ($1 !~ "^#" ) print $1 } }' \
                   "${config_file}")
-    
+
     if ! echo "${root_element}" | \
        egrep -q "^(UUID=|LABEL=|${correct_root_device})"; then
         cp -f "$config_file" "${config_file}".ga-old-$(date +"%d%m%Y_%H%M")
@@ -71,48 +71,5 @@ else
 fi
 
 fsdevice_create
-
-# -- code below is obsolete and should be removed in a near futur
-
-# hardware capability
-hwcap=1
-
-# current kernel available are : 2.6.18 (hwcap 0) as default and 2.6.27 (hwcap 1)
-if [ 1 = $(expr match $(uname -r | cut -f1 -d'-') '^2') ]; then
-    kernel_minor=$(uname -r | cut -f1 -d'-' | sed -e 's/^2\.6\.//') 
-    
-    if [ "$kernel_minor" -le 18 ]; then
-        hwcap=0
-    fi
-fi
-
-# 64 bits system does not need the nosegneg hardware capability
-if [ 'i386' = $(uname -i) ] && \
-   [ `expr match "$(file -b /bin/true)" '^ELF 32-bit'` -ge 10]; then
-    
-    if [ -d /etc/ld.so.conf.d ]; then
-        changed=0
-        lddir="/etc/ld.so.conf.d"
-
-        if [ -f "$lddir"/libc6-xen.conf ]; then
-            grep -q -o "^hwcap $hwcap nosegneg" "$lddir"/libc6-xen.conf
-            if [ $? -eq 1 ]; then
-                tempfile_=$(mktemp --suffix='gnd')
-                sed -e "s/^hwcap . nosegneg/hwcap $hwcap nosegneg/g" \
-                    "$lddir"/libc6-xen.conf > "$tempfile_"
-                mv -f "$tempfile_" "$lddir"/libc6-xen.conf
-                changed=1 
-            fi
-        else
-            echo "hwcap $hwcap nosegneg" > "$lddir/xen.conf"
-            changed=1
-        fi
-
-        if [ $changed -eq 1 ]; then
-            echo "Set the nosegneg hwcap" | logger -t "$SYSLOG_TARGET"
-            ldconfig
-        fi
-    fi
-fi
 
 exit 0
