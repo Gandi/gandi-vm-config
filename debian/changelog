@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.38~no-lz4) unstable; urgency=medium
+
+  * Drop dependency on lz4 for old distributions.
+
+ -- David Sinquin <david.sinquin@gandi.net>  Fri, 13 Oct 2020 15:37:26 +0200
+
 gandi-hosting-vm2 (2.38) unstable; urgency=medium
 
   * Add python (<< 2.8) as alternative to python2 in deb package dependencies.
