@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.38) unstable; urgency=medium
+
+  * Add python (<< 2.8) as alternative to python2 in deb package dependencies.
+
+ -- David Sinquin <david.sinquin@gandi.net>  Tue, 13 Oct 2020 15:34:01 +0200
+
 gandi-hosting-vm2 (2.37) unstable; urgency=medium
 
   [David Holl]
