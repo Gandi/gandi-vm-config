@@ -96,7 +96,7 @@ case "$1" in
 				syswant=/etc/systemd/system/default.target.wants
 			fi
 
-			for elt in mount config postboot bootstrap; do 
+			for elt in mount config postboot bootstrap sshdkeygen; do
 				rm -f "/lib/systemd/system/gandi-${elt}.service" || true
 				rm -f "$syswant/gandi-${elt}.service" || true
 
