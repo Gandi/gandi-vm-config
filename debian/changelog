@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.39) unstable; urgency=medium
+
+  * Add sshdkeygen systemd service
+
+ -- Pierre Chavanne <pierre.chavanne@gandi.net>  Thu, 18 Nov 2021 14:20:45 +0100
+
 gandi-hosting-vm2 (2.38) unstable; urgency=medium
 
   * Add python (<< 2.8) as alternative to python2 in deb package dependencies.
