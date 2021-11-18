@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.40) unstable; urgency=medium
+
+  * Fix rpm build failing
+
+ -- Pierre Chavanne <pierre.chavanne@gandi.net>  Thu, 18 Nov 2021 14:54:18 +0100
+
 gandi-hosting-vm2 (2.39) unstable; urgency=medium
 
   * Add sshdkeygen systemd service
