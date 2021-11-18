@@ -269,6 +269,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/gandi/systemd/gandi-postboot.service
 /usr/share/gandi/systemd/gandi-bootstrap.service
 /usr/share/gandi/systemd/gandi-dhclient@.service
+/usr/share/gandi/systemd/gandi-sshdkeygen.service
 
 %changelog 
 * Fri Sep 19 2008 Nicolas Chipaux <aegiap@gandi.net> 1.0.0-1474-1gnd
