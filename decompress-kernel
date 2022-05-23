@@ -4,9 +4,10 @@
 KERNEL_PATH="$1"
 
 LZ4_PATTERN=$(printf '\002!L\030')
+ZSTD_PATTERN=$(printf '(\265/\375')
 
-if grep -aq "${LZ4_PATTERN}" "${KERNEL_PATH}"; then
-	echo "Kernel is compressed with LZ4, decompressing ${KERNEL_PATH}" >&2
+if grep -aq "${LZ4_PATTERN}\|${ZSTD_PATTERN}" "${KERNEL_PATH}"; then
+	echo "Kernel is compressed with LZ4 or Zstandard, decompressing ${KERNEL_PATH}" >&2
 	tmp_file=$(mktemp /tmp/raw-kernel-XXXX)
 	if [ $? -gt 0 ]; then
 		echo "Cannot create temporary file. Exiting...";
@@ -23,5 +24,5 @@ if grep -aq "${LZ4_PATTERN}" "${KERNEL_PATH}"; then
 	echo "Replacing original file..." >&2
 	mv "${tmp_file}" "${KERNEL_PATH}"
 else
-	echo "Kernel is not compressed using LZ4. Exiting..." >&2
+	echo "Kernel is not compressed using LZ4 nor Zstandard. Exiting..." >&2
 fi

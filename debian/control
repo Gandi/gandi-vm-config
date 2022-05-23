@@ -18,7 +18,8 @@ Depends: openssl,
  acpi-support-base | acpi-support,
  mktemp | coreutils,
  binutils,
- lz4 | liblz4-tool
+ lz4 | liblz4-tool,
+ zstd
 Recommends: gdisk
 Suggests: autofs
 Conflicts: gandi-hosting-agent, 
