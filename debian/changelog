@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.41) unstable; urgency=medium
+
+  * Decompress ZSTD kernels
+
+ -- Nicolas Parquet <nicolas.parquet@gandi.net>  Mon, 23 May 2022 15:59:34 +0200
+
 gandi-hosting-vm2 (2.40) unstable; urgency=medium
 
   * Fix rpm build failing
