@@ -18,7 +18,7 @@ setup_in_swap()
 	tar -C / -x -f $1 || return
 	gdir='/gandi/'
 	test -x ${gdir}/init || return
-	/usr/local/bin/python2 ${gdir}/init
+	/usr/local/bin/python3 ${gdir}/init
 
 	# wipe out the config 1M should be enough to not be anymore a valid
 	# tar archive

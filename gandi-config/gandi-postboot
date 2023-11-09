@@ -40,7 +40,8 @@ case "$1" in
             service autofs stop
         fi
         if [ -x /gandi/init ]; then
-            pbin=/usr/bin/python2
+            pbin=/usr/bin/python3
+            [ -x $pbin ] || pbin=/usr/bin/python2
             [ -x $pbin ] || pbin=/usr/bin/python
             $pbin /gandi/init --postboot
             rm -f /gandi/init

@@ -1,4 +1,4 @@
-#!/usr/bin/python2 -tt
+#!/usr/bin/python3 -tt
 
 import posix
 import sys
@@ -195,7 +195,7 @@ def on_add(device, mountpoint):
         if debug:
             syslog.syslog('%s: mount ok then chown and chmod' % device)
         os.chown(mountpoint, 0, 1001)
-        os.chmod(mountpoint, 0775)
+        os.chmod(mountpoint, 0o775)
         if not in_mtab(mountpoint):
             if debug:
                 syslog.syslog('%s: add to /etc/mtab as missing' % device)

@@ -165,7 +165,8 @@ setup_in_swap() {
     # 3. setup script - configuration is available in /gandi/config
     # in JSON format
     if [ -x $gdir/init ]; then
-         pbin=/usr/bin/python2
+         pbin=/usr/bin/python3
+         [ -x $pbin ] || pbin=/usr/bin/python2
          [ -x $pbin ] || pbin=/usr/bin/python
          $pbin $gdir/init
     fi
