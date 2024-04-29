@@ -336,7 +336,7 @@ def get_mountpoint(device, rawdevice, disk_root):
                   close_fds=True)
             ret = command.returncode
             (output, error) = command.communicate()
-            if ret is None and not re.compile('^$').match(output):
+            if ret is None and not re.compile('^$').match(output.decode('utf-8')):
                 mountpoint = disk_root + '/' + output
             else:
                 mountpoint = disk_root + '/' + \
