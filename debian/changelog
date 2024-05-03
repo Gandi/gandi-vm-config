@@ -1,3 +1,9 @@
+gandi-hosting-vm2 (2.42) unstable; urgency=medium
+
+  * Py3k compatibility
+
+ -- Michaël Malter <nicolas.parquet@gandi.net>  Fri, 3 May 2024 10:09:32 +0200
+
 gandi-hosting-vm2 (2.41) unstable; urgency=medium
 
   * Decompress ZSTD kernels
