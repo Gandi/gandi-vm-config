@@ -11,6 +11,7 @@ SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", ENV{ID_VENDOR}=="gandi.ne", RUN+="fake
 #
 # setup network inteface attached to the local system
 #
+# The following two rules sometimes won't populate the INTERFACE variable.
 SUBSYSTEMS=="xen", SUBSYSTEM=="net", KERNEL=="eth?", RUN+="/etc/gandi/manage_iface.sh", OPTIONS+="last_rule"
 SUBSYSTEM=="net", KERNEL=="eth?", RUN+="/etc/gandi/manage_iface.sh", OPTIONS+="last_rule"
 KERNELS=="xen", SUBSYSTEM=="xen", ATTR{devtype}=="vif", OPTIONS+="ignore_device"

@@ -4,6 +4,13 @@
 # (action 'add') or detached (action 'remove') from a virtual 
 # machine.
 
+DEBUG=false
+
+if [ $DEBUG = true ] ; then
+    logger "manage_iface: executing manage_iface.sh"
+    env | logger
+fi
+
 umask 022 
 
 [ -f /etc/gandi/plugins-lib ] && . /etc/gandi/plugins-lib || exit 1
@@ -120,7 +127,7 @@ sysctl_config() {
 }
 
 if [ -z "$INTERFACE" ]; then
-        echo Interface is not defined.
+        logger "manage_iface: Interface is not defined."
         exit 1
 fi
 
@@ -139,7 +146,7 @@ case "$ACTION" in
         fi
     ;;
     "remove")
-        echo "Removing of $INTERFACE" | logger -t gandi
+        logger "manage_iface: Removing of $INTERFACE"
         # nothing to do
     ;;
 esac
