@@ -86,6 +86,8 @@ def run_command(label, cmd):
                 shell=True)
     # wait until the process has completed
     (output, error) = command.communicate()
+    output = output.decode('utf-8')
+    error = error.decode('utf-8')
     ret = command.returncode
 
     # read the stdout/stderr lines
@@ -115,7 +117,7 @@ def pre_add(device, fs_type, mountpoint):
                                stdout=subprocess.PIPE,
                                stdin=None,
                                shell=True)
-    match = re.search('^ext.', res.communicate()[0])
+    match = re.search('^ext.', res.communicate()[0].decode('utf-8'))
     if match is not None:
         fs_type = match.group(0)
 
@@ -272,6 +274,8 @@ def on_delete(device, mountpoint):
                 ret = command.returncode
                 syslog.syslog('Trying to stop %s' % service)
                 (output, error) = command.communicate()
+                output = output.decode('utf-8')
+                error = error.decode('utf-8')
 
                 if ret is not None:
                     syslog.syslog('stopping %s, output : %s and error : %s' %
@@ -336,6 +340,8 @@ def get_mountpoint(device, rawdevice, disk_root):
                   close_fds=True)
             ret = command.returncode
             (output, error) = command.communicate()
+            output = output.decode('utf-8')
+            error = error.decode('utf-8')
             if ret is None and not re.compile('^$').match(output.decode('utf-8')):
                 mountpoint = disk_root + '/' + output
             else:
