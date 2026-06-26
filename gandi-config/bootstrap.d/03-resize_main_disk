@@ -11,7 +11,7 @@ fi
 
 # If the last partition of the GPT disk has label gandiroot, resize it.
 disk=/dev/xvda
-if which sgdisk >/dev/null && [ -b "$disk" ]; then
+if [ -b "$disk" ]; then
     disk_layout=$(sgdisk -p "$disk")
     if [ $? -eq 0 ] && ! echo "${disk_layout}" | grep -qF 'Found invalid GPT'; then
         # Disk is GPT
