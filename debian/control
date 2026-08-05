@@ -20,7 +20,7 @@ Depends: openssl,
  binutils,
  lz4 | liblz4-tool,
  zstd
-Recommends: gdisk
+ gdisk
 Suggests: autofs
 Conflicts: gandi-hosting-agent, 
  gandi-hosting-agent-schemes,
@@ -43,5 +43,3 @@ Description: scripts for virtual machine on Gandi IaaS
   available unmounted virtual disks.
   - sshdkeygen: Ensure the host keys exist before starting sshd
  .
- In case of GPT partition on disk, you should install gdisk to
- handle the partitions.
