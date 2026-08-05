@@ -19,7 +19,7 @@ Depends: openssl,
  mktemp | coreutils,
  binutils,
  lz4 | liblz4-tool,
- zstd
+ zstd,
  gdisk
 Suggests: autofs
 Conflicts: gandi-hosting-agent, 
