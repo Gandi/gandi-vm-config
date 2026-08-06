@@ -59,6 +59,55 @@ decompress_lz4_kernel() {
 	done
 }
 
+is_version_number() {
+	( echo "${1}" | grep -q "^[0-9\.]*$" ) && return 0 || return 1
+}
+
+debian_version() {
+	etc_version=`cat /etc/debian_version`
+	if is_version_number "${etc_version}"; then
+		echo "${etc_version}"
+		return 0
+	else
+		echo "Undefined debian version"
+		return 1
+	fi
+}
+
+distro_name() {
+	if [ -f /etc/os-release ]; then
+		. /etc/os-release
+		echo "${ID}"
+		return 0
+	else
+		# We use head to crop the "No LSB modules are available." message.
+		lsb_release -is | head -n 1
+		return 0
+	fi
+}
+
+is_debian() {
+	name=`distro_name`
+	if [ "${name}" = 'Debian' ] || [ "${name}" = 'debian' ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+is_ubuntu() {
+	name=`distro_name`
+	if [ "${name}" = 'Ubuntu' ] || [ "${name}" = 'ubuntu' ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+debian_major_version() {
+	debian_version | cut -d '.' -f 1
+}
+
 case "$1" in
 	configure|upgrade)
 
@@ -151,39 +200,36 @@ case "$1" in
 		#    deduce the boot order.
 		mount_start=20
 
-		# debian
-		debversion=$(cat /etc/debian_version)
+		if is_debian; then
+			major_version=`debian_major_version`
+			# etch
+			if [ ${major_version} -eq 4 ]; then
+				mount_start=11
+			fi
 
-		# LSB
-		lsb=''
-		if command -v lsb_release > /dev/null; then
-			lsb=$(command -v lsb_release)
+			# lenny
+			if [ ${major_version} -eq 5 ]; then
+				mount_start=11
+			fi
+
+			# Debian stretch
+			if [ ${major_version} -ge 9 ]; then
+				disable_udev_disk_rules
+			fi
+			decompress_lz4_kernel
+
 		fi
 
-		lsb_release=''
-		lsb_distrib=''
-		if [ ! -z ${lsb} ]; then
-			lsb_release=$("${lsb}" -rs)
-			lsb_distrib=$("${lsb}" -is)
+		if is_ubuntu; then
+			major_version=`debian_major_version`
+			if [ ${major_version} -gt 17 ]; then
+				disable_udev_disk_rules
+			fi
+			decompress_lz4_kernel
 		fi
 
-		# lenny
-		ret=$(expr match "$debversion" '^5.')
-		if [ $ret -ge 2 ]; then
-			mount_start=11
-		fi
-
-		# etch
-		ret=$(expr match "$debversion" '^4.')
-		if [ $ret -ge 2 ]; then
-			mount_start=11
-		fi
-
-		# squeeze
-		# since this version initscripts management use dependancies.
-		# update-rc.d will use the correct number to start the service
-		# at the right moment : after checkroot.sh and rw remount
-
+		# mount_start should be configured sothat it start the service after
+		# checkroot.sh and rw remount
 		update-rc.d gandi-mount start ${mount_start} S . 2>&1 | \
 			egrep -v "warning:.*match LSB" | \
 			grep -q "Adding system startup" || true
@@ -192,22 +238,6 @@ case "$1" in
 		update-rc.d gandi-bootstrap start $(( ${mount_start} -2 )) S . 2>&1 | \
 			egrep -v "warning:.*match LSB" | \
 			grep -q "Adding system startup" || true
-
-		# Debian stretch
-		if [ 'Debian' = "${lsb_distrib}" ] || [ 'debian' = "${lsb_distrib}" ]; then
-			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 8 ]; then
-				disable_udev_disk_rules
-			fi
-			decompress_lz4_kernel
-		fi
-
-		# Ubuntu bionic
-		if [ 'Ubuntu' = "${lsb_distrib}" ] || [ 'ubuntu' = "${lsb_distrib}" ]; then
-			if [ `echo "${lsb_release}" | cut -d'.' -f1` -gt 17 ]; then
-				disable_udev_disk_rules
-			fi
-			decompress_lz4_kernel
-		fi
 
 		# the system uses autofs and customer rules handle /srv
 		if autofs_installed && autofs_handle_srv; then
